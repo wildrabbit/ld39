@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags: []
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - Corridor
+  - Kitchen
+  - Bedroom1
+  - Bedroom2
+  - Bedroom3
+  - Bedroom4
+  - Garage
+  - Bathroom
+  - WC
+  - LivingRoom
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: HousePlan
+    uniqueID: 2308947135
+    locked: 0
+  - name: Background
+    uniqueID: 3205201939
+    locked: 0
+  - name: Overlays
+    uniqueID: 901911423
+    locked: 0
+  - name: Charas
+    uniqueID: 2911316317
+    locked: 0
+  - name: Foreground
+    uniqueID: 3636618757
+    locked: 0
+  - name: VFX
+    uniqueID: 3378591975
+    locked: 0
+  - name: HUD
+    uniqueID: 457443063
+    locked: 0
+  - name: Popups
+    uniqueID: 2212925055
+    locked: 0
