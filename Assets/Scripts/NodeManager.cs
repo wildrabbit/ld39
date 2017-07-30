@@ -4,6 +4,24 @@ using UnityEngine;
 
 public class NodeManager : MonoBehaviour
 {
+    class VisitedInfo
+    {
+        public string refNode;
+        public int distance;
+        public Node parent;
+
+        public VisitedInfo(string _refNode = "", int _distance = System.Int32.MaxValue, Node _parent = null)
+        {
+            refNode = _refNode;
+            distance = _distance;
+            parent = _parent;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0} => Parent: {1}, Dist to source: {2}", refNode, distance, parent.name);
+        }
+    }
     Dictionary<string, Node> graph = new Dictionary<string, Node>();
     
 
@@ -11,7 +29,9 @@ public class NodeManager : MonoBehaviour
 	void Start ()
     {
         BuildGraph();
-		
+        List<Node> testPath = new List<Node>();
+        FindPath("ND (6)", "ND (26)", ref testPath);
+        Debug.LogFormat("Path len: {0}", testPath.Count);
 	}
 	
 	// Update is called once per frame
@@ -46,12 +66,13 @@ public class NodeManager : MonoBehaviour
 
     public void FindPath(string n1, string n2, ref List<Node> path)
     {
+        path.Clear();
+
         if (!graph.ContainsKey(n1) || !graph.ContainsKey(n2))
         {
             Debug.LogWarningFormat("Find path: Nodes not found");
+            return;
         }
-
-        path.Clear();
 
         if (n1 == n2)
         {
@@ -61,37 +82,60 @@ public class NodeManager : MonoBehaviour
 
         //------ We probably won't need A* here, so let's go for a simple Dijkstra
         int numVertices = graph.Count;
-        int[] distances = new int[numVertices];
-        string[] parents= new string[numVertices];
-        string[] nodeKeys = new string[numVertices];
-        List<Node> pending = new List<Node>();
 
-        graph.Keys.CopyTo(nodeKeys, 0);
-        for (int i = 0; i < numVertices; ++i)
+        Dictionary<string, VisitedInfo> info = new Dictionary<string, VisitedInfo>();
+        PriorityQueue<Node> nodesQueue = new PriorityQueue<Node>();
+
+        foreach (string key in graph.Keys)
         {
-            if (nodeKeys[i] == n1)
-            {
-                distances[i] = 0;
-            }
-            else
-            {
-                distances[i] = System.Int32.MaxValue;                
-            }
+            info[key] = new VisitedInfo(key);
+            nodesQueue.Enqueue(graph[key], info[key].distance);
+        }
+        info[n1].distance = 0;
+        nodesQueue.UpdateKey(graph[n1], 0);
+        
+        while (nodesQueue.Count > 0)
+        {
+            Node current = nodesQueue.Dequeue();
+            Debug.LogFormat("Testing {0}", current.name);
+            VisitedInfo currentInfo = info[current.name];
+            int prevDistance = currentInfo.distance;
 
-            pending.Add(graph[nodeKeys[i]]);
+            for (int i = 0; i < current.connections.Count; ++i)
+            {
+                Debug.LogFormat("Testing adjacent node: {0}", current.connections[i].name);
+                Node adjacent = current.connections[i];
+                VisitedInfo adjacentInfo = info[adjacent.name];
+                int distance = prevDistance + 1;
+                if (distance < adjacentInfo.distance)
+                {
+                    Debug.LogFormat("Updating adjacent data {0}: parent {1}, new distance {2}", adjacent.name, current, distance);
+                    adjacentInfo.parent = current;
+                    adjacentInfo.distance = distance;
+                    if (nodesQueue.Count > 0)
+                    {
+                        Debug.LogFormat("Updating priority for Node {0} to {1}", adjacent.name, distance);
+                        nodesQueue.UpdateKey(adjacent, distance);
+                    }
+                }
+            }
+            if (nodesQueue.Count > 0)
+                Debug.LogFormat("New top: {0}", nodesQueue.Peek().name);
         }
 
-        //while (pending.Count > 0)
-        //{
-        //    int current = GetSmallestIdx(pending);
-        //    Node currentNode = pending[current];
-        //    pending.RemoveAt(current);
-        //}
-        //for (int i = 0; i < current.connections.Count; ++i)
-        //{
-        //    Node adjacent = current.connections[i];
-        //}
-        
+        VisitedInfo destination = info[n2];
+        List<Node> rList = new List<Node>();
+        rList.Add(graph[n2]);
+        while(destination.parent != null)
+        {
+            rList.Add(destination.parent);
+            destination = info[destination.parent.name];
+        }
+        for (int i = rList.Count - 1; i >= 0; --i)
+        {
+            Debug.LogFormat("Path: {0}", rList[i]);
+            path.Add(rList[i]);
+        }
     }
 
     //int GetSmallestIdx(int[] distances, List<Node> pending)

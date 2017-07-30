@@ -19,4 +19,9 @@ public class Node : MonoBehaviour
     {
         connections.Add(connectedNode);
     }
+
+    public override string ToString()
+    {
+        return name;
+    }
 }

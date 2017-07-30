@@ -8,7 +8,7 @@ public class PriorityQueue<T>
 
     public PriorityQueue()
     {
-
+        heap = new PairingHeap<T>();
     }
 
     public void Enqueue(T item, int priority)
@@ -31,8 +31,16 @@ public class PriorityQueue<T>
         heap.Clear();
     }
 
-    public int Count()
+    public int Count
     {
-        return heap.Count;
+        get
+        {
+            return heap.Count;
+        }
+    }
+
+    public void UpdateKey(T elem, int newPrio)
+    {
+        heap.UpdateKey(elem, newPrio);
     }
 }

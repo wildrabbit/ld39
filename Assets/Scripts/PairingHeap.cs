@@ -14,6 +14,11 @@ public class PairingHeap<T>
             item = _item;
             priority = _priority;
         }
+
+        public override string ToString()
+        {
+            return string.Format("Item: {0}, Prio: {1}", item.ToString(), priority);
+        }
     }
 
     Entry root = null;
@@ -52,7 +57,7 @@ public class PairingHeap<T>
 
     public PairingHeap(T item, int priority)
     {
-        Entry e = new Entry(item, priority);
+        root = new Entry(item, priority);
         children = new List<PairingHeap<T>>();
     }
 
@@ -105,35 +110,54 @@ public class PairingHeap<T>
         {
             return default(T);
         }
+        else if (Count == 1)
+        {
+            T top = Peek();
+            root = null;
+            children = null;
+            return top;
+        }
         else
         {
+            T top = Peek();
             MergePairs(children);
-            return Peek();
+            return top;
         }
     }
 
-    public void UpdateKey(T item, int newPrio)
+    bool UpdateKeyInternal(T item, int newPrio, PairingHeap<T> originalHeap)
     {
         if (item == root.item && newPrio < root.priority)
         {
             root.priority = newPrio;
+            return true;
         }
-        for (int i = 0; i < children.Count; ++i)
+        bool stop = false;
+        for (int i = 0; !stop && i < children.Count; ++i)
         {
             if (children[i].root.item == item)
             {
-                if (newPrio >= children[i].root.priority) continue;
+                if (newPrio >= children[i].root.priority) return true;
                 PairingHeap<T> child = children[i];
-                children.Remove(child);
                 child.root.priority = newPrio;
-                Merge(child);
-                return;
+                if (child.root.priority < root.priority)
+                { 
+                    children.Remove(child);
+                    originalHeap.Merge(child);
+                }
+                return true;
             }
             else
             {
-                children[i].UpdateKey(item, newPrio);
+                stop = children[i].UpdateKeyInternal(item, newPrio, originalHeap);
             }
         }
+        return false;
+    }
+
+    public void UpdateKey(T item, int newPrio)
+    {
+        UpdateKeyInternal(item, newPrio, this);        
     }
 
     void MergePairs(List<PairingHeap<T>> l)
@@ -144,15 +168,35 @@ public class PairingHeap<T>
         }
         else if (l.Count == 1)
         {
-            root.item = l[0].root.item;
-            root.priority = l[0].root.priority;
-
-            children = new List<PairingHeap<T>>(l[0].children);
+            if (root == null)
+            {
+                root = l[0].root;
+            }
+            else
+            {
+                root.item = l[0].root.item;
+                root.priority = l[0].root.priority;
+            }
+            children = l[0].children;
         }
         else
         {
-            l[0].Merge(l[1]);
-            l[0].MergePairs(l.GetRange(2, l.Count - 2));
+            PairingHeap<T> aux = new PairingHeap<T>();
+            aux.Merge(l[0]);
+            aux.Merge(l[1]);
+            PairingHeap<T> aux2 = new PairingHeap<T>();
+            aux2.MergePairs(l.GetRange(2, l.Count - 2));
+            aux.Merge(aux2);
+            if (root == null)
+            {
+                root = aux.root;
+            }
+            else
+            {
+                root.item = aux.root.item;
+                root.priority = aux.root.priority;
+            }
+            children = aux.children;
         }
     }
 
@@ -164,6 +208,11 @@ public class PairingHeap<T>
             children.Clear();
         }
         children = null;
+    }
+
+    public override string ToString()
+    {
+        return string.Format("[{0}], numChildren: {1}", root, children.Count);
     }
 
 }
