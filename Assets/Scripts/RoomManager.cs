@@ -107,4 +107,11 @@ public class RoomManager : MonoBehaviour
 
         SwitchLights(status, !status.lightsOn);
     }
+
+    public RoomStatus GetRoom(string name)
+    {
+        RoomStatus status = null;
+        roomsStatus.TryGetValue(name, out status);
+        return status;
+    }
 }

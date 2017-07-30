@@ -116,6 +116,8 @@ public class CharacterConfig
     public Color clothesColour;
     public Node startNode;
     public Sprite sprite;
+    public float defaultSpeed = 2.0f;
+
 
     // Preferences
     public List<SkillPair> skillLevels = new List<SkillPair>(); // If not found, assumed 0

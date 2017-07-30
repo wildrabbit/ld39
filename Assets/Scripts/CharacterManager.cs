@@ -21,9 +21,14 @@ public class CharacterManager : MonoBehaviour
 
     public string layerOff;
     public string layerOn;
+    public string layerSelected;
 
     //---- 
     List<Character> characters;
+
+    Character currentCharacter = null;
+
+    public System.Action<Character, Character> SelectionChanged;
 
     private void Start()
     {
@@ -38,6 +43,7 @@ public class CharacterManager : MonoBehaviour
             CharacterConfig cfg = characterData[i];
             Character prefab = cfg.kid ? childTemplate : adultTemplate;
             Character newChara = Instantiate<Character>(prefab);
+            newChara.SetDependencies(this, nodeManager);
             newChara.InitFromConfig(cfg, characterRoot, cfg.startNode, cfg.startNode.room);
             newChara.transform.parent = characterRoot;
 
@@ -54,7 +60,10 @@ public class CharacterManager : MonoBehaviour
         FindCharactersInRoom(room, roomChars);
         for (int i = 0; i < characterData.Count; ++i)
         {
-            characters[i].SetLayer(on ? layerOn : layerOff);
+            if (characters[i].currentRoom == room && !IsCharacterSelected(characters[i]))
+            {
+                characters[i].SetLayer(on ? layerOn : layerOff);
+            }
         }
     }
 
@@ -69,8 +78,53 @@ public class CharacterManager : MonoBehaviour
         }
     }
 
-    public void Update()
+    public void ToggleCharacterSelection(Character chara)
     {
+        Character old = currentCharacter;
+        if (currentCharacter == null)
+        {
+            currentCharacter = chara; // NEW SELECT
+            currentCharacter.SetSelected(true);
+        }
+        else
+        {
+            if (currentCharacter != chara)
+            {
+                currentCharacter.SetSelected(false);
+                currentCharacter = chara;
+                currentCharacter.SetSelected(true);
+            }
+            else
+            {
+                currentCharacter.SetSelected(false);
+                currentCharacter = null; // DESELECT
+            }
+        }
+        Debug.LogFormat("Selected: {0}", currentCharacter == null ? "NONE" : currentCharacter.name);
 
+        if (SelectionChanged != null)
+        {
+            SelectionChanged(currentCharacter, old);
+        }
+    }
+
+    public bool IsCharacterSelected(Character test)
+    {
+        return test == currentCharacter;
+    }
+
+    public Character GetSelected()
+    {
+        return currentCharacter;
+    }
+
+    public string GetLayerForRoom(string name)
+    {
+        RoomStatus room = roomManager.GetRoom(name);
+        if (room != null)
+        {
+            return room.lightsOn ? layerOn : layerOff;
+        }
+        return layerOff;
     }
 }

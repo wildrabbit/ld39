@@ -9,6 +9,12 @@ public class Node : MonoBehaviour
     public string room;
     public string furnitureKey = "";
     public string[] rooms;
+    public Collider2D colliderRef;
+
+    public void Awake()
+    {
+        colliderRef = GetComponent<Collider2D>();
+    }
 
     public bool IsAdjacentTo(string nodeID)
     {

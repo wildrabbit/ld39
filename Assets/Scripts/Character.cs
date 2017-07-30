@@ -5,8 +5,12 @@ using UnityEngine;
 public class Character : MonoBehaviour
 {
     public const float kDefaultActivityWeight = 10f;
+    public const float kDistanceThreshold = 0.3f;
+    NodeManager nodeManagerRef = null;
+    CharacterManager characterManagerRef = null;
 
     CharacterConfig defaults;
+    float speed;
 
     public string charName;
 
@@ -15,9 +19,11 @@ public class Character : MonoBehaviour
     Dictionary<Skills, float> skills = new Dictionary<Skills, float>();
     Dictionary<CharacterActivity, float> preferences = new Dictionary<CharacterActivity, float>();
 
-    Node currentNode;
-    Node targetNode = null;
-
+    Node currentNode = null;
+    Node temp = null;
+    List<Node> path = new List<Node>();
+    int pathNextIdx = -1;
+    
     public string currentRoom = "";
 
     float happiness; // Calculated field
@@ -39,8 +45,48 @@ public class Character : MonoBehaviour
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		
+	void Update ()
+    {
+        float delta = Time.deltaTime; // We might also need the scaled value?
+        switch(currentActivity)
+        {
+            case CharacterActivity.Moving:
+            {
+                bool willReset = temp != null;
+                Node next = !willReset ? path[pathNextIdx] : temp;
+
+                Vector2 direction = (next.transform.position - transform.position).normalized;
+                    transform.Translate(direction * speed * delta);
+
+                float distanceToNextNode = Vector2.Distance(transform.position, next.transform.position);
+                if (distanceToNextNode < kDistanceThreshold)
+                {
+                    currentNode = next;
+                    int prevRoomIdx = System.Array.FindIndex(next.rooms, x => x == currentRoom);
+                    if (prevRoomIdx >= 0)
+                    {
+                        int nextRoomIdx = (prevRoomIdx + 1) % 2;
+                        Debug.LogFormat("{2} moves from {0} to {1}", next.rooms[prevRoomIdx], next.rooms[nextRoomIdx], name);
+                        currentRoom = next.rooms[nextRoomIdx];
+                    }
+                    transform.position = next.transform.position;
+                    if (willReset)
+                    {
+                        pathNextIdx = 0;
+                    }
+                    else
+                    {
+                        if (pathNextIdx == path.Count - 1)
+                        {
+                            currentActivity = CharacterActivity.Idle;
+                        }
+                        else pathNextIdx++;
+                    }
+                }
+                break;
+            }
+            default:break;
+        }		
 	}
 
     public void StartGame()
@@ -51,11 +97,18 @@ public class Character : MonoBehaviour
         // Reset other values
     }
 
+    public void SetDependencies(CharacterManager charManager, NodeManager nodeManager)
+    {
+        characterManagerRef = charManager;
+        nodeManagerRef = nodeManager;
+    }
+
     public void InitFromConfig(CharacterConfig cfg, Transform characterRoot, Node node, string roomName)
     {
         defaults = cfg;
         name = charName = defaults.name;
 
+        speed = defaults.defaultSpeed;
         rendererRef.sprite = defaults.sprite;
         needs.Clear();
         for (int i = 0; i < (int)Needs.Count; ++i)
@@ -113,5 +166,33 @@ public class Character : MonoBehaviour
     public void SetLayer(string layer)
     {
         rendererRef.sortingLayerName = layer; 
+    }
+
+    public void SetTarget(Node target)
+    {
+        if (target == currentNode) return;
+
+        if (currentActivity != CharacterActivity.Breakdown && currentActivity != CharacterActivity.Dead)
+        {
+            bool oldPath = path.Count > 0;
+            if (oldPath)
+            {
+                temp = path[pathNextIdx];
+            }
+            else
+            {
+                temp = null;
+            }
+            nodeManagerRef.FindPath(currentNode.name, target.name, ref path);
+            pathNextIdx = 0;
+            currentActivity = CharacterActivity.Moving;
+        }
+    }
+
+    public void SetSelected(bool selected)
+    {
+        rendererRef.sortingLayerName = selected ? characterManagerRef.layerSelected
+            : characterManagerRef.GetLayerForRoom(currentRoom);
+        rendererRef.color = selected ? Color.green : Color.white;
     }
 }
