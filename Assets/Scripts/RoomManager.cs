@@ -67,20 +67,37 @@ public class RoomManager : MonoBehaviour
 
     public void SwitchLights(string room, bool enabled)
     {
-        if (!roomsStatus.ContainsKey(room))
+        RoomStatus status;
+        if (!roomsStatus.TryGetValue(room, out status))
         {
             return;
         }
 
-        RoomStatus status = roomsStatus[room];
-        status.data.lights.SetActive(enabled);
-        if (enabled)
+        SwitchLights(status, enabled);
+    }
+
+    public void SwitchLights(RoomStatus status, bool enabled)
+    {
+        status.lightsOn = enabled;
+        status.data.lights.SetActive(status.lightsOn);
+        if (status.lightsOn)
         {
             generatorManager.AddDepleter(status.data.depleter);
         }
         else
         {
             generatorManager.RemoveDepleter(status.data.depleter.source);
-        }        
+        }
+    }
+
+    public void ToggleRoomLights(string room)
+    {
+        RoomStatus status;
+        if (!roomsStatus.TryGetValue(room, out status))
+        {
+            return;
+        }
+
+        SwitchLights(status, !status.lightsOn);
     }
 }
