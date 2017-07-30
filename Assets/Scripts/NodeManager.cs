@@ -29,9 +29,6 @@ public class NodeManager : MonoBehaviour
 	void Start ()
     {
         BuildGraph();
-        List<Node> testPath = new List<Node>();
-        FindPath("ND (6)", "ND (26)", ref testPath);
-        Debug.LogFormat("Path len: {0}", testPath.Count);
 	}
 	
 	// Update is called once per frame
@@ -57,7 +54,6 @@ public class NodeManager : MonoBehaviour
                 if (other == node) continue; // should never be the case
                 if (!other.IsAdjacentTo(node.name))
                 {
-                    Debug.LogWarningFormat("Adding missing connection between {0} and {1}", node.name, other.name);
                     other.AddAdjacent(node);
                 }
             }
@@ -70,7 +66,7 @@ public class NodeManager : MonoBehaviour
 
         if (!graph.ContainsKey(n1) || !graph.ContainsKey(n2))
         {
-            Debug.LogWarningFormat("Find path: Nodes not found");
+            Debug.LogWarningFormat("Find path: Nodes not found. {0} => {1}", n1, n2);
             return;
         }
 
@@ -97,30 +93,24 @@ public class NodeManager : MonoBehaviour
         while (nodesQueue.Count > 0)
         {
             Node current = nodesQueue.Dequeue();
-            Debug.LogFormat("Testing {0}", current.name);
             VisitedInfo currentInfo = info[current.name];
             int prevDistance = currentInfo.distance;
 
             for (int i = 0; i < current.connections.Count; ++i)
             {
-                Debug.LogFormat("Testing adjacent node: {0}", current.connections[i].name);
                 Node adjacent = current.connections[i];
                 VisitedInfo adjacentInfo = info[adjacent.name];
                 int distance = prevDistance + 1;
                 if (distance < adjacentInfo.distance)
                 {
-                    Debug.LogFormat("Updating adjacent data {0}: parent {1}, new distance {2}", adjacent.name, current, distance);
                     adjacentInfo.parent = current;
                     adjacentInfo.distance = distance;
                     if (nodesQueue.Count > 0)
                     {
-                        Debug.LogFormat("Updating priority for Node {0} to {1}", adjacent.name, distance);
                         nodesQueue.UpdateKey(adjacent, distance);
                     }
                 }
             }
-            if (nodesQueue.Count > 0)
-                Debug.LogFormat("New top: {0}", nodesQueue.Peek().name);
         }
 
         VisitedInfo destination = info[n2];
@@ -133,9 +123,18 @@ public class NodeManager : MonoBehaviour
         }
         for (int i = rList.Count - 1; i >= 0; --i)
         {
-            Debug.LogFormat("Path: {0}", rList[i]);
             path.Add(rList[i]);
         }
+    }
+    
+    public Vector2 GetNodePosition(string nodeName)
+    {
+        Node n;
+        if (graph.TryGetValue(nodeName, out n))
+        {
+            return n.transform.position;
+        }
+        return Vector2.zero;
     }
 
     //int GetSmallestIdx(int[] distances, List<Node> pending)

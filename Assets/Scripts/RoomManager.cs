@@ -23,7 +23,7 @@ public class ActivityEntry
 [System.Serializable]
 public class RoomStatus
 {
-    public string roomName;
+    public string name;
     public RoomData data; // shortcut
     public Dictionary<string, ActivityEntry> occupierList = new Dictionary<string, ActivityEntry>(); // TODO: Check moving chars
     public Dictionary<string, string> furnitureMappings = new Dictionary<string, string>();
@@ -41,13 +41,15 @@ public class RoomManager : MonoBehaviour
 
     Dictionary<string, RoomStatus> roomsStatus = new Dictionary<string, RoomStatus>();
 
+    public System.Action<string, bool> OnRoomLightsSwitched;
+
     private void Start()
     {
         // Initialise rooms and mappings: Everything to false!
         for (int i = 0; i < rooms.Count; ++i)
         {
             RoomStatus status = new RoomStatus();
-            status.roomName = rooms[i].name;
+            status.name = rooms[i].name;
             status.data = rooms[i];
             status.occupierList.Clear();
             status.furnitureMappings.Clear();
@@ -56,9 +58,9 @@ public class RoomManager : MonoBehaviour
                 Node furnitureNode = status.data.furnitureNodes[j];
                 status.furnitureMappings[furnitureNode.name] = furnitureNode.furnitureKey;
             }
-            roomsStatus[status.roomName] = status;
+            roomsStatus[status.name] = status;
 
-            SwitchLights(status.roomName, status.data.willStartLit);
+            SwitchLights(status.name, status.data.willStartLit);
             
        }
 
@@ -87,6 +89,11 @@ public class RoomManager : MonoBehaviour
         else
         {
             generatorManager.RemoveDepleter(status.data.depleter.source);
+        }
+        
+        if (OnRoomLightsSwitched != null)
+        {
+            OnRoomLightsSwitched(status.name, enabled);
         }
     }
 

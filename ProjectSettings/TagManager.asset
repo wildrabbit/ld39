@@ -23,7 +23,7 @@ TagManager:
   - Bathroom
   - WC
   - LivingRoom
-  - 
+  - VFX
   - 
   - 
   - 
@@ -47,11 +47,14 @@ TagManager:
   - name: Background
     uniqueID: 3205201939
     locked: 0
+  - name: Charas_BG
+    uniqueID: 2911316317
+    locked: 0
   - name: Overlays
     uniqueID: 901911423
     locked: 0
-  - name: Charas
-    uniqueID: 2911316317
+  - name: Charas_FG
+    uniqueID: 2819678265
     locked: 0
   - name: Foreground
     uniqueID: 3636618757
