@@ -57,6 +57,25 @@ public enum CharacterActivity : int
 }
 
 [System.Serializable]
+public class CharacterAnimationConfig
+{
+    public Sprite[] frontAnim;
+    public Sprite[] backAnim;
+    public Sprite[] sideAnim; // split left/right eventually?
+    public bool IsSideFacingLeft;
+    // TODO: Moar anims
+}
+
+public enum FacingDirection
+{
+    None,
+    Up,
+    Down,
+    Left,
+    Right
+}
+
+[System.Serializable]
 public class CharacterConfig
 {
     [System.Serializable]
@@ -117,6 +136,8 @@ public class CharacterConfig
     public Node startNode;
     public Sprite sprite;
     public float defaultSpeed = 2.0f;
+
+    public CharacterAnimationConfig animConfig;
 
 
     // Preferences

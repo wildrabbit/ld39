@@ -11,6 +11,10 @@ public class Node : MonoBehaviour
     public string[] rooms;
     public Collider2D colliderRef;
 
+    public FacingDirection facing = FacingDirection.None;
+    public bool forcedFlipY = false;
+    public float forcedZRotation = 0;
+
     public void Awake()
     {
         colliderRef = GetComponent<Collider2D>();

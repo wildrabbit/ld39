@@ -43,8 +43,12 @@ public class RoomManager : MonoBehaviour
 
     public System.Action<string, bool> OnRoomLightsSwitched;
 
+    public AudioSource flick;
+
     private void Start()
     {
+        flick = GetComponent<AudioSource>();
+
         // Initialise rooms and mappings: Everything to false!
         for (int i = 0; i < rooms.Count; ++i)
         {
@@ -60,14 +64,14 @@ public class RoomManager : MonoBehaviour
             }
             roomsStatus[status.name] = status;
 
-            SwitchLights(status.name, status.data.willStartLit);
+            SwitchLights(status.name, status.data.willStartLit, false);
             
        }
 
         
     }
 
-    public void SwitchLights(string room, bool enabled)
+    public void SwitchLights(string room, bool enabled, bool playSound = false)
     {
         RoomStatus status;
         if (!roomsStatus.TryGetValue(room, out status))
@@ -75,10 +79,10 @@ public class RoomManager : MonoBehaviour
             return;
         }
 
-        SwitchLights(status, enabled);
+        SwitchLights(status, enabled, playSound);
     }
 
-    public void SwitchLights(RoomStatus status, bool enabled)
+    public void SwitchLights(RoomStatus status, bool enabled, bool playSound = false)
     {
         status.lightsOn = enabled;
         status.data.lights.SetActive(status.lightsOn);
@@ -89,6 +93,11 @@ public class RoomManager : MonoBehaviour
         else
         {
             generatorManager.RemoveDepleter(status.data.depleter.source);
+        }
+
+        if (playSound && flick.clip != null)
+        {
+            flick.Play();
         }
         
         if (OnRoomLightsSwitched != null)
@@ -105,7 +114,7 @@ public class RoomManager : MonoBehaviour
             return;
         }
 
-        SwitchLights(status, !status.lightsOn);
+        SwitchLights(status, !status.lightsOn, true);
     }
 
     public RoomStatus GetRoom(string name)
@@ -113,5 +122,12 @@ public class RoomManager : MonoBehaviour
         RoomStatus status = null;
         roomsStatus.TryGetValue(name, out status);
         return status;
+    }
+
+    public bool IsRoomLit(string name)
+    {
+        RoomStatus room = GetRoom(name);
+        if (room == null) return true;
+        return room.lightsOn;
     }
 }

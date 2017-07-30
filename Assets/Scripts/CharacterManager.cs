@@ -45,8 +45,7 @@ public class CharacterManager : MonoBehaviour
             Character newChara = Instantiate<Character>(prefab);
             newChara.SetDependencies(this, nodeManager);
             newChara.InitFromConfig(cfg, characterRoot, cfg.startNode, cfg.startNode.room);
-            newChara.transform.parent = characterRoot;
-
+            newChara.StartGame();
             characters.Add(newChara);
         }
 
@@ -85,6 +84,8 @@ public class CharacterManager : MonoBehaviour
         {
             currentCharacter = chara; // NEW SELECT
             currentCharacter.SetSelected(true);
+            if (!roomManager.IsRoomLit(currentCharacter.currentRoom))
+                roomManager.SwitchLights(currentCharacter.currentRoom, true, true);
         }
         else
         {
@@ -92,7 +93,12 @@ public class CharacterManager : MonoBehaviour
             {
                 currentCharacter.SetSelected(false);
                 currentCharacter = chara;
-                currentCharacter.SetSelected(true);
+                if (chara != null)
+                {
+                    currentCharacter.SetSelected(true);
+                    if (!roomManager.IsRoomLit(currentCharacter.currentRoom))
+                        roomManager.SwitchLights(currentCharacter.currentRoom, true, true);
+                }
             }
             else
             {
