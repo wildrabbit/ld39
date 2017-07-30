@@ -14,7 +14,7 @@ public class SinglePowerDepleter
 public class ContinuousPowerDepleter
 {
     public string source = "base";
-    public float totalDepletionTimeSeconds = 24 * 3600; // No scales!
+    public float timeToDepleteInHours = 24; // No scales!
     public float duration = -1; // -1: permanent (until removed for other reasons)
     private float remaining;
 
@@ -85,7 +85,7 @@ public class GeneratorManager : MonoBehaviour
         float totalDecrease = 0.0f;
 		for (int i = depleters.Count - 1; i >= 0; --i)
         {
-            float localRate = maxGeneratorPower * delta / depleters[i].totalDepletionTimeSeconds;
+            float localRate = maxGeneratorPower * delta / (depleters[i].timeToDepleteInHours * 3600);
             totalDecrease += localRate;
             depleters[i].Update(delta);
             if (depleters[i].Finished)
