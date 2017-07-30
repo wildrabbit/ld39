@@ -1,19 +1,27 @@
 fileFormatVersion: 2
-guid: fe485e3daf09cc545aafc515a6ba7f11
-timeCreated: 1501424150
+guid: 0a437735e3c9b2c4a8f219a656114131
+timeCreated: 1501448262
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: _0000_wc
-    21300002: _0001_living
-    21300004: _0002_kitchen
-    21300006: _0003_corridor
-    21300008: _0004_bath
-    21300010: _0005_br1
-    21300012: _0006_br2
-    21300014: _0007_garage
-    21300016: _0008_br3
-    21300018: _0009_br4
+    21300000: _0000_fridge
+    21300002: _0001_table
+    21300004: _0002_cook
+    21300006: _0003_sink
+    21300008: _0004_bed1
+    21300010: _0005_bed2
+    21300012: _0006_bed3
+    21300014: _0007_bed4
+    21300016: _0008_music
+    21300018: _0009_bathtub
+    21300020: _0010_toilet
+    21300022: _0011_tv_0
+    21300024: _0012_tv_1
+    21300026: _0013_tv
+    21300028: _0014_waterTank
+    21300030: _0015_heater
+    21300032: _0016_pc
+    21300034: _0017_sofa
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -96,12 +104,155 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: _0000_wc
+      name: _0000_fridge
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 75
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: _0001_table
+      rect:
+        serializedVersion: 2
+        x: 146
+        y: 123
+        width: 61
+        height: 88
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: _0002_cook
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 151
+        width: 48
+        height: 57
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: _0003_sink
       rect:
         serializedVersion: 2
         x: 1
-        y: 25
-        width: 184
+        y: 236
+        width: 73
+        height: 50
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: _0004_bed1
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 23
+        width: 55
+        height: 102
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: _0005_bed2
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 127
+        width: 67
+        height: 107
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: _0006_bed3
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 405
+        width: 114
+        height: 106
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: _0007_bed4
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 405
+        width: 115
+        height: 106
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: _0008_music
+      rect:
+        serializedVersion: 2
+        x: 146
+        y: 213
+        width: 62
+        height: 43
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: _0009_bathtub
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 344
+        width: 109
+        height: 59
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: _0010_toilet
+      rect:
+        serializedVersion: 2
+        x: 209
+        y: 160
+        width: 46
+        height: 51
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: _0011_tv_0
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 28
+        width: 46
         height: 97
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -109,117 +260,78 @@ TextureImporter:
       outline: []
       tessellationDetail: -1
     - serializedVersion: 2
-      name: _0001_living
-      rect:
-        serializedVersion: 2
-        x: 277
-        y: 699
-        width: 251
-        height: 324
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      tessellationDetail: -1
-    - serializedVersion: 2
-      name: _0002_kitchen
-      rect:
-        serializedVersion: 2
-        x: 343
-        y: 196
-        width: 184
-        height: 294
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      tessellationDetail: -1
-    - serializedVersion: 2
-      name: _0003_corridor
+      name: _0012_tv_1
       rect:
         serializedVersion: 2
         x: 1
-        y: 488
-        width: 274
-        height: 535
+        y: 288
+        width: 94
+        height: 54
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: -1
     - serializedVersion: 2
-      name: _0004_bath
+      name: _0013_tv
       rect:
         serializedVersion: 2
-        x: 187
-        y: 35
-        width: 185
-        height: 87
+        x: 234
+        y: 408
+        width: 21
+        height: 103
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: -1
     - serializedVersion: 2
-      name: _0005_br1
+      name: _0014_waterTank
       rect:
         serializedVersion: 2
-        x: 277
-        y: 492
-        width: 184
-        height: 205
+        x: 106
+        y: 67
+        width: 56
+        height: 54
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: -1
     - serializedVersion: 2
-      name: _0006_br2
+      name: _0015_heater
       rect:
         serializedVersion: 2
-        x: 715
-        y: 844
-        width: 297
-        height: 179
+        x: 76
+        y: 210
+        width: 68
+        height: 46
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: -1
     - serializedVersion: 2
-      name: _0007_garage
+      name: _0016_pc
       rect:
         serializedVersion: 2
-        x: 1
-        y: 124
-        width: 340
-        height: 362
+        x: 106
+        y: 13
+        width: 60
+        height: 52
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: -1
     - serializedVersion: 2
-      name: _0008_br3
+      name: _0017_sofa
       rect:
         serializedVersion: 2
-        x: 374
-        y: 11
-        width: 339
-        height: 183
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      tessellationDetail: -1
-    - serializedVersion: 2
-      name: _0009_br4
-      rect:
-        serializedVersion: 2
-        x: 715
-        y: 667
-        width: 293
-        height: 175
+        x: 112
+        y: 258
+        width: 106
+        height: 145
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}

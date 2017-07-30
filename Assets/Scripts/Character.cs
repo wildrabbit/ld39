@@ -82,7 +82,6 @@ public class Character : MonoBehaviour
                     if (prevRoomIdx >= 0)
                     {
                         int nextRoomIdx = (prevRoomIdx + 1) % 2;
-                        Debug.LogFormat("{2} moves from {0} to {1}", next.rooms[prevRoomIdx], next.rooms[nextRoomIdx], name);
                         currentRoom = next.rooms[nextRoomIdx];
                         characterManagerRef.roomManager.SwitchLights(currentRoom, true, true);
                     }
@@ -101,6 +100,7 @@ public class Character : MonoBehaviour
                             pathNextIdx = -1;
                             path.Clear();
                             SetDirection((currentNode.facing != FacingDirection.None) ? currentNode.facing : FacingDirection.Down, currentNode.forcedFlipY, currentNode.forcedZRotation);
+                            characterManagerRef.CharacterArrivedToNode(this, currentNode);
                         }
                         else pathNextIdx++;
                     }
@@ -252,6 +252,10 @@ public class Character : MonoBehaviour
             nodeManagerRef.FindPath(currentNode.name, target.name, ref path);
             pathNextIdx = 0;
             currentActivity = CharacterActivity.Moving;
+            if (!string.IsNullOrEmpty(currentNode.furnitureKey))
+            {
+                characterManagerRef.CharacterLeftNode(this, currentNode);
+            }
         }
     }
 

@@ -67,8 +67,6 @@ public class RoomManager : MonoBehaviour
             SwitchLights(status.name, status.data.willStartLit, false);
             
        }
-
-        
     }
 
     public void SwitchLights(string room, bool enabled, bool playSound = false)

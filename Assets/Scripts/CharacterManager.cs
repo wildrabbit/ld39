@@ -9,6 +9,7 @@ public class CharacterManager : MonoBehaviour
     [Header("Dependencies")]
     public RoomManager roomManager;
     public NodeManager nodeManager;
+    public FurnitureManager furnitureManager;
 
     [Header("Entity Prefabs")]
     public Character adultTemplate;
@@ -59,9 +60,9 @@ public class CharacterManager : MonoBehaviour
         FindCharactersInRoom(room, roomChars);
         for (int i = 0; i < characterData.Count; ++i)
         {
-            if (characters[i].currentRoom == room && !IsCharacterSelected(characters[i]))
+            if (characters[i].currentRoom == room && !IsCharacterSelected(characters[i]) /*&& */)
             {
-                characters[i].SetLayer(on ? layerOn : layerOff);
+                characters[i].SetLayer(on || furnitureManager.IsCharacterUsingFurniture(characters[i]) ? layerOn : layerOff);
             }
         }
     }
@@ -106,8 +107,7 @@ public class CharacterManager : MonoBehaviour
                 currentCharacter = null; // DESELECT
             }
         }
-        Debug.LogFormat("Selected: {0}", currentCharacter == null ? "NONE" : currentCharacter.name);
-
+        
         if (SelectionChanged != null)
         {
             SelectionChanged(currentCharacter, old);
@@ -132,5 +132,45 @@ public class CharacterManager : MonoBehaviour
             return room.lightsOn ? layerOn : layerOff;
         }
         return layerOff;
+    }
+
+    public void CharacterArrivedToNode(Character chara, Node node)
+    {
+        if (!string.IsNullOrEmpty(node.furnitureKey))
+        {
+            furnitureManager.CharacterArrivedToNode(chara, node);
+            if (furnitureManager.IsCharacterUsingFurniture(chara))
+            {
+                chara.SetLayer(currentCharacter == chara ? layerSelected : layerOn);
+            }
+            else
+            {
+                if (currentCharacter != chara)
+                {
+                    chara.SetLayer(roomManager.IsRoomLit(chara.currentRoom) ? layerOff : layerOn);
+                }
+                else
+                {
+                    chara.SetLayer(layerSelected);
+                }
+            }
+        }
+    }
+
+    public void CharacterLeftNode(Character chara, Node node)
+    {
+        if (!string.IsNullOrEmpty(node.furnitureKey))
+        {
+            furnitureManager.CharacterLeftNode(chara, node);
+            // Reposition character layer
+            if (currentCharacter != chara)
+            {
+                chara.SetLayer(roomManager.IsRoomLit(chara.currentRoom) ? layerOff : layerOn);
+            }
+            else
+            {
+                chara.SetLayer(layerSelected);
+            }
+        }
     }
 }

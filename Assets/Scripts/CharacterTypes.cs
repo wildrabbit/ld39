@@ -26,6 +26,14 @@ public enum Needs : int
     Count
 }
 
+[System.Serializable]
+public class NeedEffect
+{
+    public Needs need;
+    public bool absolute;
+    public float needAmount; // A percent of the max if not absolute.
+}
+
 public enum Skills : int
 {
     Mechanic = 0,

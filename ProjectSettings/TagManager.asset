@@ -53,11 +53,14 @@ TagManager:
   - name: Overlays
     uniqueID: 901911423
     locked: 0
+  - name: Foreground
+    uniqueID: 3636618757
+    locked: 0
   - name: Charas_FG
     uniqueID: 2819678265
     locked: 0
-  - name: Foreground
-    uniqueID: 3636618757
+  - name: Selected
+    uniqueID: 1069527825
     locked: 0
   - name: VFX
     uniqueID: 3378591975
