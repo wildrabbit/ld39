@@ -34,6 +34,7 @@ public class HUDController : MonoBehaviour
     public Button soundToggle;
     public Text soundLabel;
     public Transform charAvatarContainer;
+    public Button resetButton;
 
     [Header("Prefabs")]
     public CharPanel charPanelPrefab;
@@ -52,6 +53,7 @@ public class HUDController : MonoBehaviour
         timeLeftLabel.text = StringUtils.FormatSeconds(timeManager.RemainingTime);
         powerValue.fillAmount = generatorManager.PowerRatio;
         soundToggle.onClick.AddListener(OnSoundClicked);
+        resetButton.onClick.AddListener(OnResetClicked);
         soundLabel.text = (listener.enabled) ? "Sound: ON" : "Sound: OFF";
     }
 
@@ -93,7 +95,12 @@ public class HUDController : MonoBehaviour
 
     void OnSoundClicked()
     {
-        listener.enabled = !listener.enabled;
-        soundLabel.text = (listener.enabled) ? "Sound: ON" : "Sound: OFF";
+        AudioListener.pause = !AudioListener.pause;             
+        soundLabel.text = (AudioListener.pause) ? "Sound: ON" : "Sound: OFF";
+    }
+
+    void OnResetClicked()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
 }

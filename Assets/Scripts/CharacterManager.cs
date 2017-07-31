@@ -5,6 +5,14 @@ using UnityEngine;
 
 public class CharacterManager : MonoBehaviour
 {
+    [Serializable]
+    public class SpeechIcons
+    {
+        public SpeechEntry entry;
+        public Sprite icon;
+        public string message;
+    }
+
     [Header("Dependencies")]
     public RoomManager roomManager;
     public NodeManager nodeManager;
@@ -17,6 +25,7 @@ public class CharacterManager : MonoBehaviour
 
     [Header("Config")]
     public List<CharacterConfig> characterData;
+    public List<SpeechIcons> speechData;
 
     public Transform characterRoot;
 
@@ -182,5 +191,25 @@ public class CharacterManager : MonoBehaviour
     public IEnumerator<Character> GetCharactersIterator()
     {
         return characters.GetEnumerator();
+    }
+
+    public Sprite GetSpeechIcon(SpeechEntry entry)
+    {
+        SpeechIcons spData = speechData.Find(x => x.entry == entry);
+        if (spData == null)
+        {
+            return null;
+        }
+        return spData.icon;
+    }
+
+    public string GetSpeechMessage(SpeechEntry entry)
+    {
+        SpeechIcons spData = speechData.Find(x => x.entry == entry);
+        if (spData == null)
+        {
+            return null;
+        }
+        return spData.message;
     }
 }

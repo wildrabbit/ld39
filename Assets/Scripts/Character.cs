@@ -28,7 +28,6 @@ public class Character : MonoBehaviour
     public readonly float[] entertMinutes = new float[] { 30.0f, 60.0f, 120.0f, 15.0f };
     public readonly float[] entertRates = new float[] { 0.2f, 0.15f, 0.1f, 0.25f };
 
-
     NodeManager nodeManagerRef = null;
     CharacterManager characterManagerRef = null;
     TimeManager timeManagerRef = null;
@@ -58,6 +57,11 @@ public class Character : MonoBehaviour
 
     public float health = 0; // Calculated field
     public float mood = 0;
+
+    public GameObject selectionItem;
+    public GameObject speechObject;
+    public SpriteRenderer speechIcon;
+
 
     public bool Dead
     {
@@ -125,6 +129,11 @@ public class Character : MonoBehaviour
             return;
         }
 
+        if (selectionItem.activeInHierarchy)
+        {
+            selectionItem.transform.Rotate(Vector3.forward, 120 * Time.deltaTime);
+        }
+
         if (StatsUpdating)
         {
             UpdateNeeds();
@@ -145,27 +154,27 @@ public class Character : MonoBehaviour
             }
             case CharacterActivity.Sleep:
             {
-                ApplyActivity(CharacterActivity.Sleep, delta, timeManagerRef.ScaledDelta, 30, 0.2f, Needs.Sleep);
+                ApplyActivity(CharacterActivity.Sleep, delta, timeManagerRef.ScaledDelta, 30, 0.2f, Needs.Sleep, SpeechEntry.FocusSleep);                
                 break;               
             }
             case CharacterActivity.Eating:
             {
-                ApplyActivity(CharacterActivity.Eating, delta, timeManagerRef.ScaledDelta, 60, 0.5f, Needs.Food, true);
+                ApplyActivity(CharacterActivity.Eating, delta, timeManagerRef.ScaledDelta, 60, 0.5f, Needs.Food, SpeechEntry.FocusEat, true);
                 break;
             }
             case CharacterActivity.Drinking:
             {
-                ApplyActivity(CharacterActivity.Drinking, delta, timeManagerRef.ScaledDelta, 30, 1.0f, Needs.Water, true);
+                ApplyActivity(CharacterActivity.Drinking, delta, timeManagerRef.ScaledDelta, 30, 1.0f, Needs.Water, SpeechEntry.FocusDrink, true);
                 break;
             }
             case CharacterActivity.Bath:
             {
-                ApplyActivity(CharacterActivity.Bath, delta, timeManagerRef.ScaledDelta, 15, 0.1f, Needs.Hygiene);
+                ApplyActivity(CharacterActivity.Bath, delta, timeManagerRef.ScaledDelta, 15, 0.1f, Needs.Hygiene, SpeechEntry.FocusBath);
                 break;
             }
             case CharacterActivity.WC:
             {
-                ApplyActivity(CharacterActivity.WC, delta, timeManagerRef.ScaledDelta, 10, 1.0f, Needs.Toilet);
+                ApplyActivity(CharacterActivity.WC, delta, timeManagerRef.ScaledDelta, 10, 1.0f, Needs.Toilet, SpeechEntry.FocusToilet, true);
                 break;
             }
             case CharacterActivity.Computer:
@@ -176,7 +185,7 @@ public class Character : MonoBehaviour
                 int actIdx = System.Array.IndexOf(entertActivities, currentActivity);
                 if (actIdx > 0)
                 {
-                    ApplyActivity(currentActivity, delta, timeManagerRef.ScaledDelta, entertMinutes[actIdx], entertRates[actIdx], Needs.Entertainment);
+                    ApplyActivity(currentActivity, delta, timeManagerRef.ScaledDelta, entertMinutes[actIdx], entertRates[actIdx], Needs.Entertainment, SpeechEntry.FocusEntertainment);
                 }
                 break;
             }
@@ -237,7 +246,7 @@ public class Character : MonoBehaviour
         }
     }
 
-    void ApplyActivity(CharacterActivity act, float delta, float worldDelta, float recoverMinutes, float percent, Needs primary, bool singleUsage = false, Needs[] secNeeds = null, float[] secRates = null, string[] resTypes = null, int[] resAmounts = null)
+    void ApplyActivity(CharacterActivity act, float delta, float worldDelta, float recoverMinutes, float percent, Needs primary, SpeechEntry speech, bool singleUsage = false, Needs[] secNeeds = null, float[] secRates = null, string[] resTypes = null, int[] resAmounts = null)
     {
         activityElapsed += worldDelta;
         if (activityElapsed >= recoverMinutes * 60)
@@ -245,6 +254,7 @@ public class Character : MonoBehaviour
             // Yay recover!
             float needRecovered = percent * defaults.initialNeedValue;
             needs[primary] = Mathf.Clamp(needs[primary] + needRecovered, 0, defaults.initialNeedValue);
+            Talk(speech);
 
             if (secNeeds != null && secRates != null)
             {
@@ -621,7 +631,7 @@ public class Character : MonoBehaviour
             : (characterManagerRef.furnitureManager.IsCharacterUsingFurniture(this))
                 ? characterManagerRef.layerOn
                 : characterManagerRef.GetLayerForRoom(currentRoom);
-        rendererRef.color = selected ? new Color(0.7f,1,1): Color.white;
+        selectionItem.SetActive(selected);
     }
 
     public void SetCurrentActivity(CharacterActivity activity)
@@ -697,5 +707,22 @@ public class Character : MonoBehaviour
     {
         currentActivity = activity;
         activityElapsed = 0;
+    }
+
+    public void Talk(SpeechEntry speech)
+    {
+        StartCoroutine(ShowSpeech(characterManagerRef.GetSpeechIcon(speech)));
+    }
+
+    IEnumerator ShowSpeech(Sprite icon)
+    {
+        if (icon != null)
+        {
+            speechObject.SetActive(true);
+            speechIcon.sprite = icon;
+            yield return new WaitForSeconds(0.8f);
+            speechObject.SetActive(false);
+        }
+        yield return null;
     }
 }

@@ -119,6 +119,33 @@ public enum FacingDirection
     Right
 }
 
+public enum SpeechEntry
+{
+    NeedFull,
+    Light,
+    NoLight,
+    NoPower,
+    Taken,
+    Restricted,
+    FocusEat,
+    FocusHungry,
+    FocusDrink,
+    FocusThirsty,
+    FocusToilet,
+    FocusNeedsToilet,
+    FocusSleep,
+    FocusSleepy,
+    FocusBath,
+    FocusFilthy,
+    FocusEntertainment,
+    FocusBored,
+    ScaredLightning,
+    Random1,
+    Random2,
+    Random3,
+    Random4,
+}
+
 [System.Serializable]
 public class CharacterConfig
 {
