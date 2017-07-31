@@ -8496,7 +8496,6 @@ GameObject:
   - component: {fileID: 1779123923}
   - component: {fileID: 1779123922}
   - component: {fileID: 1779123921}
-  - component: {fileID: 1779123924}
   - component: {fileID: 1779123920}
   m_Layer: 19
   m_Name: drops
@@ -8505,18 +8504,39 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!65 &1779123920
-BoxCollider:
+--- !u!60 &1779123920
+PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1779123919}
+  m_Enabled: 1
+  m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 9.361187, y: 10.274685, z: 20.8}
-  m_Center: {x: -2.6110353, y: -0.066926, z: -0.6447258}
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Points:
+    m_Paths:
+    - - {x: 2.1986299, y: 2.9839325}
+      - {x: 1.3860776, y: 4.6433125}
+      - {x: -5.7592177, y: 4.4843755}
+      - {x: -6.453271, y: 0.34702897}
+      - {x: -5.377244, y: -4.6702104}
+      - {x: 2.1647062, y: -4.44191}
+      - {x: 2.6641254, y: -1.5566635}
+      - {x: 5.2810817, y: -1.556659}
+      - {x: 5.694691, y: 3.1574574}
 --- !u!199 &1779123921
 ParticleSystemRenderer:
   serializedVersion: 3
@@ -10671,7 +10691,7 @@ ParticleSystem:
     enabled: 1
     serializedVersion: 3
     type: 1
-    collisionMode: 0
+    collisionMode: 1
     plane0: {fileID: 0}
     plane1: {fileID: 0}
     plane2: {fileID: 0}
@@ -10801,11 +10821,11 @@ ParticleSystem:
     collidesWith:
       serializedVersion: 2
       m_Bits: 524288
-    maxCollisionShapes: 256
+    maxCollisionShapes: 200
     quality: 0
     voxelSize: 0.5
     collisionMessages: 0
-    collidesWithDynamic: 1
+    collidesWithDynamic: 0
     interiorCollisions: 0
   TriggerModule:
     enabled: 0
@@ -11585,18 +11605,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &1779123924
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1779123919}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 5.6032443, y: 6.4868183, z: 20.8}
-  m_Center: {x: 3.6466272, y: 0.5308609, z: -0.34445667}
 --- !u!1001 &1786640480
 Prefab:
   m_ObjectHideFlags: 0
