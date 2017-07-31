@@ -1,8 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-
 
 public class CharacterManager : MonoBehaviour
 {
@@ -30,7 +29,8 @@ public class CharacterManager : MonoBehaviour
 
     Character currentCharacter = null;
 
-    public System.Action<Character, Character> SelectionChanged;
+    public Action<Character, Character> SelectionChanged;
+    public Action CharactersReady;
 
     private void Start()
     {
@@ -49,6 +49,10 @@ public class CharacterManager : MonoBehaviour
             newChara.InitFromConfig(cfg, characterRoot, cfg.startNode, cfg.startNode.room);
             newChara.StartGame();
             characters.Add(newChara);
+        }
+        if (CharactersReady != null)
+        {
+            CharactersReady();
         }
 
         roomManager.OnRoomLightsSwitched -= OnRoomLightsSwitched;
@@ -173,5 +177,10 @@ public class CharacterManager : MonoBehaviour
                 chara.SetLayer(layerSelected);
             }
         }
+    }
+
+    public IEnumerator<Character> GetCharactersIterator()
+    {
+        return characters.GetEnumerator();
     }
 }

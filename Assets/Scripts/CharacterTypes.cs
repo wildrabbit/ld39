@@ -16,7 +16,7 @@ public enum CharacterMood: int
 public enum Needs : int
 {
     Food = 0,
-    Drink,
+    Water,
     Toilet,
     Sleep,
     Temperature,
@@ -70,7 +70,34 @@ public enum CharacterActivity : int
     Drinking,
     WC,
     Bath,
+    Healing,
     Count
+}
+
+public enum EnvironmentActivityCheckResult
+{
+    Success,
+    NoFood,
+    NoWater,
+    Light, //Darkness activities :D
+    NoLight,
+    NoPower,
+    NoMeds
+}
+public enum CharacterActivityCheckResult
+{
+    Success,
+    Dead,
+    Breakdown,
+    Sick,
+    NeedSatisfied,
+    NeedNotMet,
+    SkillFailed
+}
+
+public class ActivityContext
+{
+    public string furnitureKey; // For example, if we're operating/repairing, WTF is it we're fixing?
 }
 
 [System.Serializable]
@@ -148,6 +175,7 @@ public class CharacterConfig
     public Color clothesColour;
     public Node startNode;
     public Sprite sprite;
+    public Sprite portrait;
     public float defaultSpeed = 2.0f;
     public float initialNeedValue = 100.0f;
     public CharacterAnimationConfig animConfig;

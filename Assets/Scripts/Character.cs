@@ -11,28 +11,39 @@ public class Character : MonoBehaviour
         Critical,
         Zero
     }
-    public const float kWarningRatio = 0.4f;
-    public const float kCriticalRatio = 0.15f;
+    public const float kWarningRatio = 0.3f;
+    public const float kCriticalRatio = 0.1f;
 
-    public const float kHealthWarningSickProbability = 0.001f;
-    public const float kHealthCriticalSickProbability = 0.005f;
-    public const float kMoodWarningSickProbability = 0.001f;
-    public const float kMoodCriticalSickProbability = 0.005f;
+    public const float kHealthWarningSickProbability = 0.05f;
+    public const float kHealthCriticalSickProbability = 0.07f;
+    public const float kMoodWarningBreakdownProbability = 0.05f;
+    public const float kMoodCriticalBreakdownProbability = 0.08f;
+
+    public const float kStatusCheckDelay = 3.0f;
 
     public const float kDefaultActivityWeight = 10f;
     public const float kDistanceThreshold = 0.05f;
+
+    public readonly CharacterActivity[] entertActivities = new CharacterActivity[] { CharacterActivity.Computer, CharacterActivity.TV, CharacterActivity.Read, CharacterActivity.Dancing };
+    public readonly float[] entertMinutes = new float[] { 30.0f, 60.0f, 120.0f, 15.0f };
+    public readonly float[] entertRates = new float[] { 0.2f, 0.15f, 0.1f, 0.25f };
+
 
     NodeManager nodeManagerRef = null;
     CharacterManager characterManagerRef = null;
     TimeManager timeManagerRef = null;
 
-    CharacterConfig defaults;
+    float activityElapsed = -1.0f;
+    float statusCheckElapsed = -1.0f;
+
+    [HideInInspector]
+    public CharacterConfig defaults;
     float speed;
 
     public string charName;
 
-    CharacterActivity currentActivity = CharacterActivity.Idle;
-    CharacterStatus currentStatus = CharacterStatus.None;
+    public CharacterActivity currentActivity = CharacterActivity.Idle;
+    public CharacterStatus currentStatus = CharacterStatus.None;
 
     Dictionary<Needs, float> needs = new Dictionary<Needs, float>();
     Dictionary<Skills, float> skills = new Dictionary<Skills, float>();
@@ -47,6 +58,30 @@ public class Character : MonoBehaviour
 
     public float health = 0; // Calculated field
     public float mood = 0;
+
+    public bool Dead
+    {
+        get
+        {
+            return currentStatus == CharacterStatus.Dead;
+        }
+    }
+
+    public bool Breakdown
+    {
+        get
+        {
+            return (currentStatus & CharacterStatus.Breakdown) != CharacterStatus.None;
+        }
+    }
+
+    public bool Sick
+    {
+        get
+        {
+            return (currentStatus & CharacterStatus.Sick) != CharacterStatus.None;
+        }
+    }
 
     SpriteRenderer rendererRef;
     Collider2D colliderRef;
@@ -85,6 +120,11 @@ public class Character : MonoBehaviour
     void Update ()
     {
         // TODO: Check game end.
+        if (Dead)
+        {
+            return;
+        }
+
         if (StatsUpdating)
         {
             UpdateNeeds();
@@ -93,46 +133,50 @@ public class Character : MonoBehaviour
         float delta = Time.deltaTime; // We might also need the scaled value?
         switch(currentActivity)
         {
+            case CharacterActivity.Idle:
+            {
+                UpdateIdle(delta);
+                break;
+            }
             case CharacterActivity.Moving:
             {
-                bool willReset = temp != null;
-                Node next = !willReset ? path[pathNextIdx] : temp;
-
-                Vector2 direction = (next.transform.position - transform.position).normalized;
-                transform.Translate(direction * speed * delta);
-
-                SetDirection(ResolveFacingDirection(direction));
-
-                float distanceToNextNode = Vector2.Distance(transform.position, next.transform.position);
-                if (distanceToNextNode < kDistanceThreshold)
+                UpdateMotion(delta);                
+                break;
+            }
+            case CharacterActivity.Sleep:
+            {
+                ApplyActivity(CharacterActivity.Sleep, delta, timeManagerRef.ScaledDelta, 30, 0.2f, Needs.Sleep);
+                break;               
+            }
+            case CharacterActivity.Eating:
+            {
+                ApplyActivity(CharacterActivity.Eating, delta, timeManagerRef.ScaledDelta, 60, 0.5f, Needs.Food, true);
+                break;
+            }
+            case CharacterActivity.Drinking:
+            {
+                ApplyActivity(CharacterActivity.Drinking, delta, timeManagerRef.ScaledDelta, 30, 1.0f, Needs.Water, true);
+                break;
+            }
+            case CharacterActivity.Bath:
+            {
+                ApplyActivity(CharacterActivity.Bath, delta, timeManagerRef.ScaledDelta, 15, 0.1f, Needs.Hygiene);
+                break;
+            }
+            case CharacterActivity.WC:
+            {
+                ApplyActivity(CharacterActivity.WC, delta, timeManagerRef.ScaledDelta, 10, 1.0f, Needs.Toilet);
+                break;
+            }
+            case CharacterActivity.Computer:
+            case CharacterActivity.TV:
+            case CharacterActivity.Read:
+            case CharacterActivity.Dancing:
+            {
+                int actIdx = System.Array.IndexOf(entertActivities, currentActivity);
+                if (actIdx > 0)
                 {
-                    currentNode = next;
-                    int prevRoomIdx = System.Array.FindIndex(next.rooms, x => x == currentRoom);
-                    if (prevRoomIdx >= 0)
-                    {
-                        int nextRoomIdx = (prevRoomIdx + 1) % 2;
-                        currentRoom = next.rooms[nextRoomIdx];
-                        characterManagerRef.roomManager.SwitchLights(currentRoom, true, true);
-                    }
-                    transform.position = next.transform.position;
-                    if (willReset)
-                    {
-                        pathNextIdx = 0;
-                        temp = null;
-                    }
-                    else
-                    {
-                        // STOPPED!
-                        if (pathNextIdx == path.Count - 1)
-                        {
-                            currentActivity = CharacterActivity.Idle;
-                            pathNextIdx = -1;
-                            path.Clear();
-                            SetDirection((currentNode.facing != FacingDirection.None) ? currentNode.facing : FacingDirection.Down, currentNode.forcedFlipY, currentNode.forcedZRotation);
-                            characterManagerRef.CharacterArrivedToNode(this, currentNode);
-                        }
-                        else pathNextIdx++;
-                    }
+                    ApplyActivity(currentActivity, delta, timeManagerRef.ScaledDelta, entertMinutes[actIdx], entertRates[actIdx], Needs.Entertainment);
                 }
                 break;
             }
@@ -144,10 +188,95 @@ public class Character : MonoBehaviour
         EvaluateStats();
 	}
 
+    void UpdateIdle(float delta)
+    {
+        FurnitureManager furnitureManager = characterManagerRef.furnitureManager;
+        characterManagerRef.CharacterArrivedToNode(this, currentNode);        
+    }
+
+    void UpdateMotion(float delta)
+    {
+        bool willReset = temp != null;
+        Node next = !willReset ? path[pathNextIdx] : temp;
+
+        Vector2 direction = (next.transform.position - transform.position).normalized;
+        transform.Translate(direction * speed * delta);
+
+        SetDirection(ResolveFacingDirection(direction));
+
+        float distanceToNextNode = Vector2.Distance(transform.position, next.transform.position);
+        if (distanceToNextNode < kDistanceThreshold)
+        {
+            currentNode = next;
+            int prevRoomIdx = System.Array.FindIndex(next.rooms, x => x == currentRoom);
+            if (prevRoomIdx >= 0)
+            {
+                int nextRoomIdx = (prevRoomIdx + 1) % 2;
+                currentRoom = next.rooms[nextRoomIdx];
+                characterManagerRef.roomManager.SwitchLights(currentRoom, true, true);
+            }
+            transform.position = next.transform.position;
+            if (willReset)
+            {
+                pathNextIdx = 0;
+                temp = null;
+            }
+            else
+            {
+                // STOPPED!
+                if (pathNextIdx == path.Count - 1)
+                {
+                    currentActivity = CharacterActivity.Idle;
+                    pathNextIdx = -1;
+                    path.Clear();
+                    SetDirection((currentNode.facing != FacingDirection.None) ? currentNode.facing : FacingDirection.Down, currentNode.forcedFlipY, currentNode.forcedZRotation);
+                    characterManagerRef.CharacterArrivedToNode(this, currentNode);
+                }
+                else pathNextIdx++;
+            }
+        }
+    }
+
+    void ApplyActivity(CharacterActivity act, float delta, float worldDelta, float recoverMinutes, float percent, Needs primary, bool singleUsage = false, Needs[] secNeeds = null, float[] secRates = null, string[] resTypes = null, int[] resAmounts = null)
+    {
+        activityElapsed += worldDelta;
+        if (activityElapsed >= recoverMinutes * 60)
+        {
+            // Yay recover!
+            float needRecovered = percent * defaults.initialNeedValue;
+            needs[primary] = Mathf.Clamp(needs[primary] + needRecovered, 0, defaults.initialNeedValue);
+
+            if (secNeeds != null && secRates != null)
+            {
+                for (int i = 0; i < secNeeds.Length; ++i)
+                {
+                    float secDelta = secRates[i] * defaults.initialNeedValue;
+                    needs[secNeeds[i]] = Mathf.Clamp(needs[primary] + secDelta, 0, defaults.initialNeedValue);
+                }
+            }
+
+            if (resTypes != null && resAmounts != null)
+            {
+                // TODO: Resources!
+            }
+
+            if (singleUsage || Mathf.Approximately(needs[primary], defaults.initialNeedValue))
+            {
+                // Change to idle and disable furniture
+                currentActivity = CharacterActivity.Idle;
+                characterManagerRef.CharacterLeftNode(this, currentNode);
+            }
+            else
+            {
+                activityElapsed = 0.0f;
+            }
+        }
+    }
     void EvaluateStats()
     {
-        int numNeeds = (int)Needs.Count;
+        statusCheckElapsed += Time.deltaTime;
 
+        int numNeeds = (int)Needs.Count;
         StatAlertType[] needAlerts = new StatAlertType[numNeeds];
         for (int i = 0; i < needAlerts.Length; ++i)
         {
@@ -184,8 +313,10 @@ public class Character : MonoBehaviour
                 }
             }
         }
-        health /= totalHealthWeight;
-        mood /= totalMoodWeight;
+        health = Mathf.Clamp01(health / totalHealthWeight);
+        if (health < 0.01f) health = 0;
+        mood = Mathf.Clamp01(mood / totalMoodWeight);
+        if (mood < 0.01f) mood = 0;
 
         if (Mathf.Approximately(health, 0))
         {
@@ -197,25 +328,29 @@ public class Character : MonoBehaviour
         }
         else
         {
-            EvaluateStat(health, CharacterStatus.Sick
-                , kWarningRatio, kHealthWarningSickProbability
-                , kCriticalRatio, kHealthCriticalSickProbability
-                , ref currentStatus, ref healthAlert);
+            if (statusCheckElapsed >= kStatusCheckDelay)
+            {
+                statusCheckElapsed = 0;
+                EvaluateStat(health, CharacterStatus.Sick
+                    , kWarningRatio, kHealthWarningSickProbability
+                    , kCriticalRatio, kHealthCriticalSickProbability
+                    , ref currentStatus, ref healthAlert);
 
-            EvaluateStat(mood, CharacterStatus.Breakdown
-                , kWarningRatio, kMoodWarningSickProbability
-                , kCriticalRatio, kMoodCriticalSickProbability
-                , ref currentStatus, ref moodAlert);
+                EvaluateStat(mood, CharacterStatus.Breakdown
+                    , kWarningRatio, kMoodWarningBreakdownProbability
+                    , kCriticalRatio, kMoodCriticalBreakdownProbability
+                    , ref currentStatus, ref moodAlert);
+            }
         }
 
         if (healthAlert != StatAlertType.None)
         {
-            Debug.LogWarningFormat("{0}!, health ratio: {1}", healthAlert, health);
+            //Debug.LogWarningFormat("{0}!, health ratio: {1}", healthAlert, health);
         }
 
         if (moodAlert != StatAlertType.None)
         {
-            Debug.LogWarningFormat("{0}!, mood ratio: {1}", moodAlert, mood);
+            //Debug.LogWarningFormat("{0}!, mood ratio: {1}", moodAlert, mood);
         }
 
         List<int> relevantAlerts = new List<int>();
@@ -231,7 +366,6 @@ public class Character : MonoBehaviour
         {
             int idx = relevantAlerts[Random.Range(0, relevantAlerts.Count - 1)];
             Needs n = (Needs)idx;
-            Debug.LogWarningFormat("Need {0}, ratio: {1}!", n, needs[n] / defaults.initialNeedValue);
         }
     }
 
@@ -288,7 +422,7 @@ public class Character : MonoBehaviour
                     }
                     break;
                 }
-            case Needs.Drink:
+            case Needs.Water:
                 {
                     if (currentActivity == CharacterActivity.Drinking)
                     {
@@ -340,11 +474,13 @@ public class Character : MonoBehaviour
 
     public void StartGame()
     {
+        statusCheckElapsed = 0;
         currentNode = defaults.startNode;
         currentRoom = defaults.startNode.room;
         transform.position = defaults.startNode.transform.position;
 
         SetDirection(currentNode.facing == FacingDirection.None ? FacingDirection.Down : currentNode.facing, currentNode.forcedFlipY, currentNode.forcedZRotation);
+        EvaluateStats();
     }
 
     public void SetDependencies(CharacterManager charManager, NodeManager nodeManager, TimeManager timeManager)
@@ -486,5 +622,80 @@ public class Character : MonoBehaviour
                 ? characterManagerRef.layerOn
                 : characterManagerRef.GetLayerForRoom(currentRoom);
         rendererRef.color = selected ? new Color(0.7f,1,1): Color.white;
+    }
+
+    public void SetCurrentActivity(CharacterActivity activity)
+    {
+        SetCurrentActivity(activity, null);
+    }
+
+    public CharacterActivityCheckResult CanCharacterEngageInActivity(CharacterActivity activity, ActivityContext context)
+    {
+        if (Dead) return CharacterActivityCheckResult.Dead; // Obviously...
+        if (Breakdown && activity != CharacterActivity.Idle && activity != CharacterActivity.Moving) return CharacterActivityCheckResult.Breakdown;
+        switch(activity)
+        {
+            case CharacterActivity.Sleep:
+            {
+                if (needs[Needs.Sleep] >= defaults.initialNeedValue * 0.95f)
+                {
+                    return CharacterActivityCheckResult.NeedSatisfied;
+                }
+                break;
+            }
+            case CharacterActivity.Eating:
+            {
+                if (needs[Needs.Food] >= defaults.initialNeedValue * 0.95f)
+                {
+                    return CharacterActivityCheckResult.NeedSatisfied;
+                }
+                break;
+            }
+            case CharacterActivity.Drinking:
+            {
+                if (needs[Needs.Water] >= defaults.initialNeedValue * 0.95f)
+                {
+                        return CharacterActivityCheckResult.NeedSatisfied;
+                }
+                break;
+            }
+            case CharacterActivity.Bath:
+            {
+                if (needs[Needs.Hygiene] / defaults.initialNeedValue >= 0.7f)
+                    return CharacterActivityCheckResult.NeedSatisfied;
+                break;
+            }
+            case CharacterActivity.Computer:
+            case CharacterActivity.TV:
+            case CharacterActivity.Dancing:
+            case CharacterActivity.Read:
+            {
+                if (Sick) return CharacterActivityCheckResult.Sick;
+                break;
+            }
+            case CharacterActivity.WC:
+            {
+                if (needs[Needs.Toilet] / defaults.initialNeedValue >= 0.55f)
+                {
+                    return CharacterActivityCheckResult.NeedSatisfied;
+                }
+                break;
+            }
+            case CharacterActivity.Repairing:
+            case CharacterActivity.Operating:
+            case CharacterActivity.Cooking:
+            {
+                if (Sick) return CharacterActivityCheckResult.Sick;
+                break;
+            }
+            default: break;
+        }
+        return CharacterActivityCheckResult.Success;
+    }
+
+    public void SetCurrentActivity(CharacterActivity activity, ActivityContext context)
+    {
+        currentActivity = activity;
+        activityElapsed = 0;
     }
 }

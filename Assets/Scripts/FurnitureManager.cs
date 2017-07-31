@@ -19,6 +19,11 @@ public class FurnitureManager : MonoBehaviour
         }
 	}
 
+    public EnvironmentActivityCheckResult CanActivityStartAt(CharacterActivity activity, Node n, ActivityContext ctxt)
+    {
+        return EnvironmentActivityCheckResult.Success;
+    }
+
     public void CharacterArrivedToNode(Character chara, Node node)
     {
         if (assignedCharacters.ContainsKey(node.furnitureKey) && assignedCharacters[node.furnitureKey] != chara.name)
@@ -29,6 +34,25 @@ public class FurnitureManager : MonoBehaviour
         {
             assignedCharacters[node.furnitureKey] = chara.name;
             furnitureTable[node.furnitureKey].SetOperationState(true);
+            CharacterActivity nodeActivity = (furnitureTable[node.furnitureKey].activity == CharacterActivity.Count)
+                ? CharacterActivity.Idle
+                : furnitureTable[node.furnitureKey].activity;
+
+            // TODO: Add context
+            ActivityContext ctxt = null;
+
+            if (CanActivityStartAt(nodeActivity, node, ctxt) != EnvironmentActivityCheckResult.Success)
+            {
+                // Logger
+                return;
+            }
+            
+            if (chara.CanCharacterEngageInActivity(nodeActivity, null) != CharacterActivityCheckResult.Success)
+            {
+                // Character status / resource checks (would resource-dependent ones belong here -as they are- or on the environment check?)
+                return; 
+            }
+            chara.SetCurrentActivity(nodeActivity);
         }
     }
 
@@ -51,6 +75,19 @@ public class FurnitureManager : MonoBehaviour
             }
         }
         return false;
+    }
+
+    CharacterActivity GetActivity(string furnitureKey)
+    {
+        Furniture furniture;
+        if (furnitureTable.TryGetValue(furnitureKey, out furniture))
+        {
+            return furniture.activity;
+        }
+        else
+        {
+            return CharacterActivity.Count;
+        }
     }
 
     // Update is called once per frame

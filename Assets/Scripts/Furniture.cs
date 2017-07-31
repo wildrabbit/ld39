@@ -37,6 +37,7 @@ public class Furniture : MonoBehaviour
     public FurnitureConfig cfg;
     bool isEnabled = false;
     FurnitureManager furnitureManagerRef;
+    public CharacterActivity activity = CharacterActivity.Count;
 
     public bool IsEnabled
     {
