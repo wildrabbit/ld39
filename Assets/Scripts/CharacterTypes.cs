@@ -44,6 +44,16 @@ public enum Skills : int
     Defender,
     Count
 }
+
+[Flags]
+public enum CharacterStatus
+{
+    None = 0,
+    Sick = 0x1, // Impaired skills
+    Breakdown = 0x2, // Uncontrollable.
+    Dead = 0x4//...
+}
+
 public enum CharacterActivity : int
 {
     Sleep = 0,
@@ -52,15 +62,14 @@ public enum CharacterActivity : int
     Repairing,
     Operating,
     Read,
+    Dancing,
     TV,
-    Console,
-    Toys,
+    Computer,
     Cooking,
     Eating,
+    Drinking,
     WC,
-    Bath, // Probably not
-    Dead,
-    Breakdown,
+    Bath,
     Count
 }
 
@@ -104,23 +113,6 @@ public class CharacterConfig
     }
 
     [System.Serializable]
-    public struct NeedPair
-    {
-        public Needs nd;
-        public float initial;
-        // Time to fulfill?? (Belongs more in furniture, doesn't it?)
-        public bool Equals(NeedPair other)
-        {
-            return Equals(other, this);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is NeedPair && ((NeedPair)obj).nd == nd;
-        }
-    }
-
-    [System.Serializable]
     public struct ActivityConfig
     {
         public CharacterActivity activity;
@@ -138,19 +130,31 @@ public class CharacterConfig
         }
     }
 
+    /*
+    Food = 0,
+    Drink,
+    Toilet,
+    Sleep,
+    Temperature,
+    Hygiene,
+    Entertainment */
+    public float[] defaultNeedDepletionTimeHours = new float[(int)Needs.Count] { 6.0f, 4.0f, 3.0f, 12.0f, 16.0f, 10.0f, 8.0f, 24.0f };
+    public float[] moodWeight = new float[(int)Needs.Count] { 15.0f, 15.0f, 15.0f, 20.0f, 12.0f, 8.0f, 25.0f, 10.0f };
+    public float[] healthWeight = new float[(int)Needs.Count] { 25.0f, 30.0f, 8.0f, 20.0f, 16.0f, 10.0f, 8.0f, 4.0f };
+
+
     public bool kid;
     public string name;
     public Color clothesColour;
     public Node startNode;
     public Sprite sprite;
     public float defaultSpeed = 2.0f;
-
+    public float initialNeedValue = 100.0f;
     public CharacterAnimationConfig animConfig;
 
 
     // Preferences
     public List<SkillPair> skillLevels = new List<SkillPair>(); // If not found, assumed 0
-    public List<NeedPair> startNeeds = new List<NeedPair>();
     public List<ActivityConfig> preferences = new List<ActivityConfig>();// Weighting player's likelihood of favouring activities over others. 
                                                                          // By default will be 10.
 }

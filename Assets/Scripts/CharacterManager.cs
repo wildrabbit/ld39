@@ -10,6 +10,7 @@ public class CharacterManager : MonoBehaviour
     public RoomManager roomManager;
     public NodeManager nodeManager;
     public FurnitureManager furnitureManager;
+    public TimeManager timeManager;
 
     [Header("Entity Prefabs")]
     public Character adultTemplate;
@@ -44,7 +45,7 @@ public class CharacterManager : MonoBehaviour
             CharacterConfig cfg = characterData[i];
             Character prefab = cfg.kid ? childTemplate : adultTemplate;
             Character newChara = Instantiate<Character>(prefab);
-            newChara.SetDependencies(this, nodeManager);
+            newChara.SetDependencies(this, nodeManager, timeManager);
             newChara.InitFromConfig(cfg, characterRoot, cfg.startNode, cfg.startNode.room);
             newChara.StartGame();
             characters.Add(newChara);

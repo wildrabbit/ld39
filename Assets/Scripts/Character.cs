@@ -4,10 +4,27 @@ using UnityEngine;
 
 public class Character : MonoBehaviour
 {
+    public enum StatAlertType
+    {
+        None,
+        Warning,
+        Critical,
+        Zero
+    }
+    public const float kWarningRatio = 0.4f;
+    public const float kCriticalRatio = 0.15f;
+
+    public const float kHealthWarningSickProbability = 0.001f;
+    public const float kHealthCriticalSickProbability = 0.005f;
+    public const float kMoodWarningSickProbability = 0.001f;
+    public const float kMoodCriticalSickProbability = 0.005f;
+
     public const float kDefaultActivityWeight = 10f;
     public const float kDistanceThreshold = 0.05f;
+
     NodeManager nodeManagerRef = null;
     CharacterManager characterManagerRef = null;
+    TimeManager timeManagerRef = null;
 
     CharacterConfig defaults;
     float speed;
@@ -15,6 +32,8 @@ public class Character : MonoBehaviour
     public string charName;
 
     CharacterActivity currentActivity = CharacterActivity.Idle;
+    CharacterStatus currentStatus = CharacterStatus.None;
+
     Dictionary<Needs, float> needs = new Dictionary<Needs, float>();
     Dictionary<Skills, float> skills = new Dictionary<Skills, float>();
     Dictionary<CharacterActivity, float> preferences = new Dictionary<CharacterActivity, float>();
@@ -26,12 +45,16 @@ public class Character : MonoBehaviour
     
     public string currentRoom = "";
 
-    float happiness; // Calculated field
-    CharacterMood Mood; // An even more calculated field
-
+    public float health = 0; // Calculated field
+    public float mood = 0;
 
     SpriteRenderer rendererRef;
     Collider2D colliderRef;
+
+    public bool StatsUpdating
+    {
+        get { return (currentStatus & CharacterStatus.Dead) == CharacterStatus.None; }
+    }
 
     void Awake()
     {
@@ -61,6 +84,12 @@ public class Character : MonoBehaviour
     // Update is called once per frame
     void Update ()
     {
+        // TODO: Check game end.
+        if (StatsUpdating)
+        {
+            UpdateNeeds();
+        }
+
         float delta = Time.deltaTime; // We might also need the scaled value?
         switch(currentActivity)
         {
@@ -108,8 +137,206 @@ public class Character : MonoBehaviour
                 break;
             }
             default:break;
-        }		
+        }
+
+        // Finally, determine mood health and events.
+        // Both are weighted averages.
+        EvaluateStats();
 	}
+
+    void EvaluateStats()
+    {
+        int numNeeds = (int)Needs.Count;
+
+        StatAlertType[] needAlerts = new StatAlertType[numNeeds];
+        for (int i = 0; i < needAlerts.Length; ++i)
+        {
+            needAlerts[i] = StatAlertType.None;
+        }
+
+        StatAlertType healthAlert = StatAlertType.None;
+        StatAlertType moodAlert = StatAlertType.None;
+
+        float totalMoodWeight = 0;
+        float totalHealthWeight = 0;
+        for (int i = 0; i < (int)numNeeds; ++i)
+        {
+            totalMoodWeight += defaults.moodWeight[i];
+            totalHealthWeight += defaults.healthWeight[i];
+        }
+
+        mood = 0;
+        health = 0;
+
+        for (int i = 0; i < (int)numNeeds; ++i)
+        {
+            Needs n = (Needs)i;
+            float needRatio = needs[n] / defaults.initialNeedValue;
+            mood += defaults.moodWeight[i] * needRatio;
+            health += defaults.healthWeight[i] * needRatio;
+
+            if (needRatio < kWarningRatio)
+            {
+                needAlerts[i] = StatAlertType.Warning;
+                if (needRatio < kCriticalRatio)
+                {
+                    needAlerts[i] = Mathf.Approximately(needRatio, 0.0f) ? StatAlertType.Zero : StatAlertType.Critical;                    
+                }
+            }
+        }
+        health /= totalHealthWeight;
+        mood /= totalMoodWeight;
+
+        if (Mathf.Approximately(health, 0))
+        {
+            currentStatus = CharacterStatus.Dead;
+        }
+        else if (Mathf.Approximately(mood, 0))
+        {
+            currentStatus = CharacterStatus.Breakdown;
+        }
+        else
+        {
+            EvaluateStat(health, CharacterStatus.Sick
+                , kWarningRatio, kHealthWarningSickProbability
+                , kCriticalRatio, kHealthCriticalSickProbability
+                , ref currentStatus, ref healthAlert);
+
+            EvaluateStat(mood, CharacterStatus.Breakdown
+                , kWarningRatio, kMoodWarningSickProbability
+                , kCriticalRatio, kMoodCriticalSickProbability
+                , ref currentStatus, ref moodAlert);
+        }
+
+        if (healthAlert != StatAlertType.None)
+        {
+            Debug.LogWarningFormat("{0}!, health ratio: {1}", healthAlert, health);
+        }
+
+        if (moodAlert != StatAlertType.None)
+        {
+            Debug.LogWarningFormat("{0}!, mood ratio: {1}", moodAlert, mood);
+        }
+
+        List<int> relevantAlerts = new List<int>();
+        for (int i = 0; i < needAlerts.Length; ++i)
+        {
+            if (needAlerts[i] != StatAlertType.None)
+            {
+                relevantAlerts.Add(i);
+            }
+        }
+
+        if (relevantAlerts.Count > 0)
+        {
+            int idx = relevantAlerts[Random.Range(0, relevantAlerts.Count - 1)];
+            Needs n = (Needs)idx;
+            Debug.LogWarningFormat("Need {0}, ratio: {1}!", n, needs[n] / defaults.initialNeedValue);
+        }
+    }
+
+    public void EvaluateStat(float ratio, CharacterStatus inflictedStatus
+        , float warning, float statusWarningProbability
+        , float critical, float statusCritical
+        , ref CharacterStatus outStatus, ref StatAlertType alertType)
+    {
+        float statusChance = 0;
+        if (ratio < warning)
+        {
+            statusChance = statusWarningProbability;
+            alertType = StatAlertType.Warning;
+            if (ratio < critical)
+            {
+                statusChance = statusCritical;
+                alertType = (Mathf.Approximately(ratio, 0.0f) ? StatAlertType.Zero : StatAlertType.Critical);
+            }
+        }
+        if (statusChance > 0.0f)
+        {
+            float roll = UnityEngine.Random.value;
+            if (roll < statusChance)
+            {
+                outStatus |= inflictedStatus;
+            }
+        }
+    }
+
+    void UpdateNeeds()
+    {
+        int numNeeds = (int)Needs.Count;
+
+        for (int i = 0; i < numNeeds; ++i)
+        {
+            Needs curNeed = (Needs)i;
+            //float factor = GetNeedModifierFactor(curNeed);
+            float amount = defaults.initialNeedValue * (timeManagerRef.ScaledDelta / (defaults.defaultNeedDepletionTimeHours[i] * 3600));
+            amount *= GetNeedModifierFactor(curNeed);
+            needs[curNeed] = Mathf.Clamp(needs[curNeed] - amount, 0.0f, defaults.initialNeedValue); // Don't raise anything yet. Maybe activities have changed this.
+        }
+    }
+
+    float GetNeedModifierFactor(Needs need)
+    {
+        float factor = 1.0f;
+        switch (need)
+        {
+            case Needs.Food:
+                {
+                    if (currentActivity == CharacterActivity.Eating)
+                    {
+                        factor = 0.0f;
+                    }
+                    break;
+                }
+            case Needs.Drink:
+                {
+                    if (currentActivity == CharacterActivity.Drinking)
+                    {
+                        factor = 0.0f;
+                    }
+                    break;
+                }
+            case Needs.Toilet:
+                {
+                    if (currentActivity == CharacterActivity.WC)
+                    {
+                        factor = 0.0f;
+                    }
+                    break;
+                }
+            case Needs.Sleep:
+                {
+                    if (currentActivity == CharacterActivity.Sleep)
+                    {
+                        factor = 0.0f;
+                    }
+                    break;
+                }
+            case Needs.Temperature:
+                {
+                    break; // Check inventory, or global temperature.
+                }
+            case Needs.Hygiene:
+                {
+                    if (currentActivity == CharacterActivity.Bath)
+                    {
+                        factor = 0.0f;
+                    }
+                    break;
+                }
+            case Needs.Entertainment:
+                {
+                    if (currentActivity == CharacterActivity.Computer || currentActivity == CharacterActivity.TV 
+                        || currentActivity == CharacterActivity.Read || currentActivity == CharacterActivity.Dancing)
+                    {
+                        factor = 0.0f;
+                    }
+                    break;
+                }
+            default:break;
+        }
+        return factor;
+    }
 
     public void StartGame()
     {
@@ -120,10 +347,11 @@ public class Character : MonoBehaviour
         SetDirection(currentNode.facing == FacingDirection.None ? FacingDirection.Down : currentNode.facing, currentNode.forcedFlipY, currentNode.forcedZRotation);
     }
 
-    public void SetDependencies(CharacterManager charManager, NodeManager nodeManager)
+    public void SetDependencies(CharacterManager charManager, NodeManager nodeManager, TimeManager timeManager)
     {
         characterManagerRef = charManager;
         nodeManagerRef = nodeManager;
+        timeManagerRef = timeManager;
     }
 
     public void InitFromConfig(CharacterConfig cfg, Transform characterRoot, Node node, string roomName)
@@ -137,15 +365,7 @@ public class Character : MonoBehaviour
         for (int i = 0; i < (int)Needs.Count; ++i)
         {
             Needs curNeed = (Needs)i;
-            CharacterConfig.NeedPair pair = cfg.startNeeds.Find(x => x.nd == curNeed);
-            if (!pair.Equals(default(CharacterConfig.NeedPair)))
-            {
-                needs[curNeed] = pair.initial;
-            }
-            else
-            {
-                needs[curNeed] = 100;
-            }
+            needs[curNeed] = 100;
         }
 
         skills.Clear();
@@ -238,7 +458,7 @@ public class Character : MonoBehaviour
     {
         if (target == currentNode) return;
 
-        if (currentActivity != CharacterActivity.Breakdown && currentActivity != CharacterActivity.Dead)
+        if (currentStatus != CharacterStatus.Breakdown && currentStatus != CharacterStatus.Dead)
         {
             bool oldPath = path.Count > 0;
             if (oldPath)
@@ -262,7 +482,9 @@ public class Character : MonoBehaviour
     public void SetSelected(bool selected)
     {
         rendererRef.sortingLayerName = selected ? characterManagerRef.layerSelected
-            : characterManagerRef.GetLayerForRoom(currentRoom);
+            : (characterManagerRef.furnitureManager.IsCharacterUsingFurniture(this))
+                ? characterManagerRef.layerOn
+                : characterManagerRef.GetLayerForRoom(currentRoom);
         rendererRef.color = selected ? new Color(0.7f,1,1): Color.white;
     }
 }

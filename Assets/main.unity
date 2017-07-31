@@ -2892,17 +2892,46 @@ MonoBehaviour:
   roomManager: {fileID: 692803432}
   nodeManager: {fileID: 122522240}
   furnitureManager: {fileID: 419744620}
+  timeManager: {fileID: 1594640134}
   adultTemplate: {fileID: 114854131575838622, guid: 7b820c2fc8b26c94ab9e4d69913ee5a8,
     type: 2}
   childTemplate: {fileID: 114849502759237842, guid: 2a318c72685ea184a8c1df2a8a797446,
     type: 2}
   characterData:
-  - kid: 1
+  - defaultNeedDepletionTimeHours:
+    - 6
+    - 4
+    - 3
+    - 12
+    - 16
+    - 10
+    - 8
+    - 24
+    moodWeight:
+    - 15
+    - 15
+    - 15
+    - 20
+    - 12
+    - 8
+    - 25
+    - 10
+    healthWeight:
+    - 25
+    - 30
+    - 8
+    - 20
+    - 16
+    - 10
+    - 8
+    - 4
+    kid: 1
     name: Timmy
     clothesColour: {r: 0, g: 0, b: 0, a: 0}
     startNode: {fileID: 1061260405}
     sprite: {fileID: 21300000, guid: f338b61a3d28bf84283a301f3d8fb7db, type: 3}
     defaultSpeed: 3
+    initialNeedValue: 100
     animConfig:
       frontAnim:
       - {fileID: 21300012, guid: 89ee5878e48a55a468dbd1dbbb5a8d38, type: 3}
@@ -2912,14 +2941,41 @@ MonoBehaviour:
       - {fileID: 21300010, guid: 89ee5878e48a55a468dbd1dbbb5a8d38, type: 3}
       IsSideFacingLeft: 0
     skillLevels: []
-    startNeeds: []
     preferences: []
-  - kid: 0
+  - defaultNeedDepletionTimeHours:
+    - 6
+    - 4
+    - 3
+    - 12
+    - 16
+    - 10
+    - 8
+    - 24
+    moodWeight:
+    - 15
+    - 15
+    - 15
+    - 20
+    - 12
+    - 8
+    - 25
+    - 10
+    healthWeight:
+    - 25
+    - 30
+    - 8
+    - 20
+    - 16
+    - 10
+    - 8
+    - 4
+    kid: 0
     name: Laura
     clothesColour: {r: 0, g: 0, b: 0, a: 0}
     startNode: {fileID: 1288844825}
     sprite: {fileID: 21300000, guid: 1d17879219d1d6643a649cd4d4103554, type: 3}
     defaultSpeed: 2
+    initialNeedValue: 100
     animConfig:
       frontAnim:
       - {fileID: 21300014, guid: 89ee5878e48a55a468dbd1dbbb5a8d38, type: 3}
@@ -2937,14 +2993,41 @@ MonoBehaviour:
       level: 2
     - sk: 4
       level: 1
-    startNeeds: []
     preferences: []
-  - kid: 0
+  - defaultNeedDepletionTimeHours:
+    - 6
+    - 4
+    - 3
+    - 12
+    - 16
+    - 10
+    - 8
+    - 24
+    moodWeight:
+    - 15
+    - 15
+    - 15
+    - 20
+    - 12
+    - 8
+    - 25
+    - 10
+    healthWeight:
+    - 25
+    - 30
+    - 8
+    - 20
+    - 16
+    - 10
+    - 8
+    - 4
+    kid: 0
     name: Jerry
     clothesColour: {r: 0, g: 0, b: 0, a: 0}
     startNode: {fileID: 1828614348}
     sprite: {fileID: 21300000, guid: 1d17879219d1d6643a649cd4d4103554, type: 3}
     defaultSpeed: 2
+    initialNeedValue: 100
     animConfig:
       frontAnim:
       - {fileID: 21300000, guid: 89ee5878e48a55a468dbd1dbbb5a8d38, type: 3}
@@ -2956,7 +3039,6 @@ MonoBehaviour:
     skillLevels:
     - sk: 0
       level: 3
-    startNeeds: []
     preferences: []
   characterRoot: {fileID: 1452103390}
   layerOff: Charas_BG
