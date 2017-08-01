@@ -212,4 +212,16 @@ public class CharacterManager : MonoBehaviour
         }
         return spData.message;
     }
+
+    public bool ExistsCharacterAtNode(Node n)
+    {
+        for (int i = 0; i < characters.Count; ++i)
+        {
+            if (characters[i].currentNode == n)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }

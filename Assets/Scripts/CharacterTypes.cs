@@ -92,7 +92,9 @@ public enum CharacterActivityCheckResult
     Sick,
     NeedSatisfied,
     NeedNotMet,
-    SkillFailed
+    SkillFailed,
+    Forbidden,
+    RoomIsLit
 }
 
 public class ActivityContext
@@ -140,10 +142,11 @@ public enum SpeechEntry
     FocusEntertainment,
     FocusBored,
     ScaredLightning,
-    Random1,
-    Random2,
-    Random3,
-    Random4,
+    Sick,
+    Breakdown,
+    Dead,
+    FocusHealth,
+    None
 }
 
 [System.Serializable]

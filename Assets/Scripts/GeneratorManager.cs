@@ -43,11 +43,16 @@ public class GeneratorManager : MonoBehaviour
     [Header("Manager dependencies")]
     [SerializeField]
     TimeManager timeManager;
+    [SerializeField]
+    CharacterManager charManager;
 
     [Header("Config data")]
     public float maxGeneratorPower = 100;
     
     public ContinuousPowerDepleter baseDepleter;
+
+    public float showWarningBelowRatio = 0.1f;
+    bool showedWarning = false;
 
     //------------------------
 
@@ -76,6 +81,19 @@ public class GeneratorManager : MonoBehaviour
         if (timeManager.finished) return;
 
         Update(timeManager.ScaledDelta);
+
+        if (PowerRatio < showWarningBelowRatio && !showedWarning)
+        {
+            IEnumerator<Character> chars = charManager.GetCharactersIterator();
+            while (chars.MoveNext())
+            {
+                if (!chars.Current.Dead)
+                {
+                    chars.Current.Talk(SpeechEntry.NoPower);
+                }
+            }
+            showedWarning = true;
+        }
     }
 
     // Update is called once per frame

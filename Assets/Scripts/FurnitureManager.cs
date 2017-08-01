@@ -46,10 +46,14 @@ public class FurnitureManager : MonoBehaviour
                 // Logger
                 return;
             }
-            
-            if (chara.CanCharacterEngageInActivity(nodeActivity, null) != CharacterActivityCheckResult.Success)
+
+            CharacterActivityCheckResult checkResult = chara.CanCharacterEngageInActivity(nodeActivity, null);
+            if (checkResult != CharacterActivityCheckResult.Success)
             {
-                // Character status / resource checks (would resource-dependent ones belong here -as they are- or on the environment check?)
+                if (checkResult == CharacterActivityCheckResult.RoomIsLit)
+                {
+                    chara.Talk(SpeechEntry.NoLight);
+                }
                 return; 
             }
             chara.SetCurrentActivity(nodeActivity);
@@ -77,7 +81,7 @@ public class FurnitureManager : MonoBehaviour
         return false;
     }
 
-    CharacterActivity GetActivity(string furnitureKey)
+    public CharacterActivity GetActivity(string furnitureKey)
     {
         Furniture furniture;
         if (furnitureTable.TryGetValue(furnitureKey, out furniture))

@@ -364,7 +364,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.015000001, y: 0.7358431}
   m_AnchorMax: {x: 0.10410221, y: 0.83417636}
-  m_AnchoredPosition: {x: 0.39996338, y: 1.300003}
+  m_AnchoredPosition: {x: 0.39996338, y: 1.3000183}
   m_SizeDelta: {x: -6.699997, y: -3.8420029}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &32652870
@@ -1570,6 +1570,7 @@ Transform:
   - {fileID: 2105254051}
   - {fileID: 1594408080}
   - {fileID: 1452103390}
+  - {fileID: 1894750030}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2311,6 +2312,7 @@ MonoBehaviour:
   minDuration: 0.4
   maxDuration: 2
   blinkRepeat: 0.05
+  charManager: {fileID: 648085460}
   blink: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &548841055
 Prefab:
@@ -3323,6 +3325,18 @@ MonoBehaviour:
   - entry: 18
     icon: {fileID: 21300012, guid: ac943f27cb4226a48b96409e269d7d91, type: 3}
     message: 
+  - entry: 19
+    icon: {fileID: 21300016, guid: ac943f27cb4226a48b96409e269d7d91, type: 3}
+    message: 
+  - entry: 20
+    icon: {fileID: 21300014, guid: ac943f27cb4226a48b96409e269d7d91, type: 3}
+    message: 
+  - entry: 21
+    icon: {fileID: 21300030, guid: ac943f27cb4226a48b96409e269d7d91, type: 3}
+    message: 
+  - entry: 22
+    icon: {fileID: 21300044, guid: ac943f27cb4226a48b96409e269d7d91, type: 3}
+    message: 
   characterRoot: {fileID: 1452103390}
   layerOff: Charas_BG
   layerOn: Charas_FG
@@ -3583,7 +3597,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.015000001, y: 0.8525097}
   m_AnchorMax: {x: 0.099102214, y: 0.9480001}
-  m_AnchoredPosition: {x: 2.399994, y: -0.8999939}
+  m_AnchoredPosition: {x: 2.4000244, y: -0.8999939}
   m_SizeDelta: {x: -2.7000008, y: -1.841999}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &693984879
@@ -8658,11 +8672,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeManager: {fileID: 1594640134}
+  charManager: {fileID: 648085460}
   maxGeneratorPower: 100
   baseDepleter:
     source: base
-    timeToDepleteInHours: 12
+    timeToDepleteInHours: 18
     duration: -1
+  showWarningBelowRatio: 0.1
   remainingGenerator: 100
 --- !u!1 &1745286004
 GameObject:
@@ -12813,6 +12829,34 @@ Transform:
   m_PrefabParentObject: {fileID: 4807300257518850, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
     type: 2}
   m_PrefabInternal: {fileID: 1890882767}
+--- !u!1 &1894750029
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1894750030}
+  m_Layer: 0
+  m_Name: SpeechRoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1894750030
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1894750029}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 368987101}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1916311620
 Prefab:
   m_ObjectHideFlags: 0

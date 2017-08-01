@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Lightning : MonoBehaviour {
+public class Lightning : MonoBehaviour
+{
     public float minDelay = 10.0f;
     public float maxDelay = 40.0f;
 
@@ -11,6 +12,8 @@ public class Lightning : MonoBehaviour {
     public float blinkRepeat = 0.08f;
     float waitElapsed = 0;
     float blinkElapsed = 0;
+
+    public CharacterManager charManager;
 
     public Color blink = Color.white;
 
@@ -45,6 +48,14 @@ public class Lightning : MonoBehaviour {
                 blinkElapsed = 0.0f;
                 strike.Play();
                 InvokeRepeating("Blink", 0.2f, blinkRepeat);
+                IEnumerator<Character> chars = charManager.GetCharactersIterator();
+                while (chars.MoveNext())
+                {
+                    if (!chars.Current.Dead)
+                    {
+                        chars.Current.Talk(SpeechEntry.ScaredLightning);
+                    }
+                }                
             }
         }
         else if (blinkElapsed >= 0)

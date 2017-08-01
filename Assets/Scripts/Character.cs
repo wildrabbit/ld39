@@ -48,7 +48,7 @@ public class Character : MonoBehaviour
     Dictionary<Skills, float> skills = new Dictionary<Skills, float>();
     Dictionary<CharacterActivity, float> preferences = new Dictionary<CharacterActivity, float>();
 
-    Node currentNode = null;
+    public Node currentNode = null;
     Node temp = null;
     List<Node> path = new List<Node>();
     int pathNextIdx = -1;
@@ -61,6 +61,9 @@ public class Character : MonoBehaviour
     public GameObject selectionItem;
     public GameObject speechObject;
     public SpriteRenderer speechIcon;
+
+    Transform speechRoot;
+    Vector3 offset;
 
 
     public bool Dead
@@ -99,6 +102,8 @@ public class Character : MonoBehaviour
     {
         rendererRef = GetComponent<SpriteRenderer>();
         colliderRef = GetComponent<Collider2D>();
+
+        speechRoot = GameObject.Find("SpeechRoot").transform;
     }
     // Use this for initialization
     void Start ()
@@ -331,6 +336,7 @@ public class Character : MonoBehaviour
         if (Mathf.Approximately(health, 0))
         {
             currentStatus = CharacterStatus.Dead;
+            Talk(SpeechEntry.Dead);
         }
         else if (Mathf.Approximately(mood, 0))
         {
@@ -344,17 +350,20 @@ public class Character : MonoBehaviour
                 EvaluateStat(health, CharacterStatus.Sick
                     , kWarningRatio, kHealthWarningSickProbability
                     , kCriticalRatio, kHealthCriticalSickProbability
+                    , SpeechEntry.Sick
                     , ref currentStatus, ref healthAlert);
 
                 EvaluateStat(mood, CharacterStatus.Breakdown
                     , kWarningRatio, kMoodWarningBreakdownProbability
                     , kCriticalRatio, kMoodCriticalBreakdownProbability
+                    , SpeechEntry.Breakdown
                     , ref currentStatus, ref moodAlert);
             }
         }
 
-        if (healthAlert != StatAlertType.None)
+        if (healthAlert != StatAlertType.None && healthAlert != StatAlertType.Zero)
         {
+            Talk(SpeechEntry.FocusHealth);
             //Debug.LogWarningFormat("{0}!, health ratio: {1}", healthAlert, health);
         }
 
@@ -376,12 +385,52 @@ public class Character : MonoBehaviour
         {
             int idx = relevantAlerts[Random.Range(0, relevantAlerts.Count - 1)];
             Needs n = (Needs)idx;
+            SpeechEntry e = SpeechEntry.None;
+            switch(n)
+            {
+                case Needs.Food:
+                    {
+                        e = SpeechEntry.FocusHungry;
+                        break;
+                    }
+                case Needs.Water:
+                    {
+                        e = SpeechEntry.FocusThirsty;
+                        break;
+                    }
+                case Needs.Toilet:
+                    {
+                        e = SpeechEntry.FocusNeedsToilet;
+                        break;
+                    }
+                case Needs.Hygiene:
+                    {
+                        e = SpeechEntry.FocusFilthy;
+                        break;
+                    }
+                case Needs.Sleep:
+                    {
+                        e = SpeechEntry.FocusSleepy;
+                        break;
+                    }
+                case Needs.Entertainment:
+                    {
+                        e = SpeechEntry.FocusBored;
+                        break;
+                    }
+                default:break;
+            }
+            if (e != SpeechEntry.None && Random.value < 0.000001f)
+            {
+                Talk(e);
+            }
         }
     }
 
     public void EvaluateStat(float ratio, CharacterStatus inflictedStatus
         , float warning, float statusWarningProbability
         , float critical, float statusCritical
+        , SpeechEntry statusSpeech
         , ref CharacterStatus outStatus, ref StatAlertType alertType)
     {
         float statusChance = 0;
@@ -398,9 +447,10 @@ public class Character : MonoBehaviour
         if (statusChance > 0.0f)
         {
             float roll = UnityEngine.Random.value;
-            if (roll < statusChance)
+            if (roll < statusChance && ((outStatus & inflictedStatus) == CharacterStatus.None))
             {
                 outStatus |= inflictedStatus;
+                Talk(statusSpeech);
             }
         }
     }
@@ -489,6 +539,9 @@ public class Character : MonoBehaviour
         currentRoom = defaults.startNode.room;
         transform.position = defaults.startNode.transform.position;
 
+        offset = speechObject.transform.localPosition;
+        speechObject.transform.parent = speechRoot;
+
         SetDirection(currentNode.facing == FacingDirection.None ? FacingDirection.Down : currentNode.facing, currentNode.forcedFlipY, currentNode.forcedZRotation);
         EvaluateStats();
     }
@@ -554,10 +607,12 @@ public class Character : MonoBehaviour
         Vector3 rot = transform.eulerAngles;
         rot.z = forcedRotation;
         transform.eulerAngles = rot;
+
         Vector3 localScale = transform.localScale;
         localScale.y = Mathf.Abs(localScale.y) * ((forcedFlipY) ? -1 : 1);
         localScale.x = Mathf.Abs(localScale.x);
-        switch(dir)
+
+        switch (dir)
         {
             case FacingDirection.Down:
                 {
@@ -592,6 +647,7 @@ public class Character : MonoBehaviour
                     break;
                 }
         }
+
         transform.localScale = localScale;
     }
 
@@ -604,6 +660,19 @@ public class Character : MonoBehaviour
     {
         if (target == currentNode) return;
 
+        if (characterManagerRef.ExistsCharacterAtNode(target))
+        {
+            Talk(SpeechEntry.Taken);
+            return;
+        }
+
+        CharacterActivityCheckResult result = CanCharacterEngageInActivity(characterManagerRef.furnitureManager.GetActivity(target.furnitureKey), null);
+        if (result == CharacterActivityCheckResult.Forbidden)
+        {
+            Talk(SpeechEntry.Restricted);
+            return;
+        }
+        
         if (currentStatus != CharacterStatus.Breakdown && currentStatus != CharacterStatus.Dead)
         {
             bool oldPath = path.Count > 0;
@@ -651,6 +720,10 @@ public class Character : MonoBehaviour
                 {
                     return CharacterActivityCheckResult.NeedSatisfied;
                 }
+                else if (characterManagerRef.roomManager.IsRoomLit(currentRoom))
+                {
+                        return CharacterActivityCheckResult.RoomIsLit;
+                }
                 break;
             }
             case CharacterActivity.Eating:
@@ -696,6 +769,11 @@ public class Character : MonoBehaviour
             case CharacterActivity.Cooking:
             {
                 if (Sick) return CharacterActivityCheckResult.Sick;
+                else if (defaults.kid)
+                {
+                    Talk(SpeechEntry.Restricted);
+                    return CharacterActivityCheckResult.Forbidden;
+                }
                 break;
             }
             default: break;
@@ -711,6 +789,7 @@ public class Character : MonoBehaviour
 
     public void Talk(SpeechEntry speech)
     {
+        if (speechObject.activeInHierarchy) return;
         StartCoroutine(ShowSpeech(characterManagerRef.GetSpeechIcon(speech)));
     }
 
@@ -719,6 +798,12 @@ public class Character : MonoBehaviour
         if (icon != null)
         {
             speechObject.SetActive(true);
+            Vector3 off = offset;
+            if (transform.localScale.y < 0)
+            {
+                off.y = 0.0f;
+            }
+            speechObject.transform.position = transform.position + off;
             speechIcon.sprite = icon;
             yield return new WaitForSeconds(0.8f);
             speechObject.SetActive(false);

@@ -32,7 +32,8 @@ public class TouchManager : MonoBehaviour
 		if (Input.GetMouseButtonDown(0))
         {
             Ray ray = camRef.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D hitInfo = Physics2D.GetRayIntersection(ray, Mathf.Infinity);
+            LayerMask mask = LayerMask.NameToLayer("Raindrops");
+            RaycastHit2D hitInfo = Physics2D.GetRayIntersection(ray, Mathf.Infinity, ~(1 << mask));
 
             RoomTouchMapping touchMapping = null;
             Collider2D hitCollider = hitInfo.collider;
