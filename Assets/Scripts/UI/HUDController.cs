@@ -54,7 +54,7 @@ public class HUDController : MonoBehaviour
         powerValue.fillAmount = generatorManager.PowerRatio;
         soundToggle.onClick.AddListener(OnSoundClicked);
         resetButton.onClick.AddListener(OnResetClicked);
-        soundLabel.text = (listener.enabled) ? "Sound: ON" : "Sound: OFF";
+        soundLabel.text = (AudioListener.pause) ? "Sound: OFF" : "Sound: ON";
     }
 
     public Sprite GetActivityIcon(CharacterActivity activity)
@@ -96,7 +96,7 @@ public class HUDController : MonoBehaviour
     void OnSoundClicked()
     {
         AudioListener.pause = !AudioListener.pause;             
-        soundLabel.text = (AudioListener.pause) ? "Sound: ON" : "Sound: OFF";
+        soundLabel.text = (AudioListener.pause) ? "Sound: OFF" : "Sound: ON";
     }
 
     void OnResetClicked()
