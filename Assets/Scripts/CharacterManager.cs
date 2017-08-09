@@ -241,7 +241,7 @@ public class CharacterManager : MonoBehaviour, IGameplaySystem
         {
             return GameResult.AllDead;
         }
-        else if (numDead == numInBreakdown)
+        else if (numInBreakdown == numChars)
         {
             return GameResult.AllInBreakdown;
         }
@@ -250,5 +250,32 @@ public class CharacterManager : MonoBehaviour, IGameplaySystem
             return GameResult.ExistsDeadOrBreakdown;
         }
         return result;
+    }
+
+    public void UpdateSystem(float dt)
+    {
+        // When/if we need some different logic for finished/paused states, then replace this with
+        // equivalent logic on PauseGame or GameFinished.
+        if (!gameplayManager.GameStarted || gameplayManager.GameFinished || gameplayManager.Paused) return;
+
+        foreach (Character ch in characters)
+        {
+            ch.LogicUpdate(dt);
+        }
+
+        // Notify early game over
+        GameResult end = ResolveGameStatus();
+        if (end == GameResult.AllDead || end == GameResult.AllInBreakdown)
+        {
+            gameplayManager.AllCharactersDeadOrBrokenDown(end);
+        }
+    }
+
+    public void PauseGame(bool value)
+    {
+    }
+
+    public void GameFinished(GameResult result)
+    {
     }
 }

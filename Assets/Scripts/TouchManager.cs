@@ -26,7 +26,7 @@ public class TouchManager : MonoBehaviour, IGameplaySystem
     {}
 	
 	// Update is called once per frame
-	void Update ()
+	public void UpdateSystem (float dt)
     {
 		if (Input.GetMouseButtonDown(0))
         {
@@ -66,4 +66,12 @@ public class TouchManager : MonoBehaviour, IGameplaySystem
         
         }
 	}
+
+    public void PauseGame(bool value)
+    {
+    }
+
+    public void GameFinished(GameResult result)
+    {
+    }
 }

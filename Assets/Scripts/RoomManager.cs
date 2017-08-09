@@ -134,4 +134,16 @@ public class RoomManager : MonoBehaviour, IGameplaySystem
         if (room == null) return true;
         return room.lightsOn;
     }
+
+    public void UpdateSystem(float dt)
+    {
+    }
+
+    public void PauseGame(bool value)
+    {
+    }
+
+    public void GameFinished(GameResult result)
+    {
+    }
 }

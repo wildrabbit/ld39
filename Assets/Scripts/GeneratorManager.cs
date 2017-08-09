@@ -82,11 +82,11 @@ public class GeneratorManager : MonoBehaviour, IGameplaySystem
         depleters.Add(baseDepleter);
 	}
 
-    void Update()
+    public void UpdateSystem(float dt)
     {
         if (gameplayManager.GameFinished) return;
 
-        Update(timeManager.ScaledDelta);
+        LogicUpdate(timeManager.ScaledDelta);
 
         if (PowerRatio < showWarningBelowRatio && !showedWarning)
         {
@@ -103,7 +103,7 @@ public class GeneratorManager : MonoBehaviour, IGameplaySystem
     }
 
     // Update is called once per frame
-    void Update (float delta)
+    void LogicUpdate (float delta)
     {
         float depletionScaler = 1.0f / timeManager.scale;
         float totalDecrease = 0.0f;
@@ -157,5 +157,13 @@ public class GeneratorManager : MonoBehaviour, IGameplaySystem
             return true;
         }
         return false;
+    }
+    
+    public void PauseGame(bool value)
+    {
+    }
+
+    public void GameFinished(GameResult result)
+    {
     }
 }

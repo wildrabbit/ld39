@@ -26,7 +26,6 @@ public class NodeManager : MonoBehaviour
     }
     Dictionary<string, Node> graph = new Dictionary<string, Node>();
     
-
     public void BuildGraph()
     {
         Node[] nodes = nodeRoot.GetComponentsInChildren<Node>();

@@ -167,6 +167,11 @@ public class CharacterConfig
         {
             return obj is SkillPair && ((SkillPair)obj).sk == sk;
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 
     [System.Serializable]
@@ -184,6 +189,12 @@ public class CharacterConfig
         public override bool Equals(object obj)
         {
             return obj is ActivityConfig && ((ActivityConfig)obj).activity == activity;
+        }
+
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 

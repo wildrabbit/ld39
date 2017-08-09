@@ -2,6 +2,7 @@
 {
     void Initialise(GameplayManager gm);
     void StartGame();
-    //void GamePaused(bool value);
-    //void GameFinished(GameResult result);
+    void UpdateSystem(float dt);
+    void PauseGame(bool value);
+    void GameFinished(GameResult result);
 }

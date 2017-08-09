@@ -60,7 +60,7 @@ public class Furniture : MonoBehaviour
         }
     }
 
-    void Update()
+    public void LogicUpdate(float dt)
     {
         if (!isEnabled) return;
         // Do stuff

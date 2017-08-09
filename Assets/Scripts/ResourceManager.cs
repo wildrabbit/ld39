@@ -30,5 +30,17 @@ public class ResourceManager : MonoBehaviour, IGameplaySystem
     public void UseResource(string resource)
     {
         // Notify
-    }    
+    }
+
+    public void UpdateSystem(float dt)
+    {
+    }
+
+    public void PauseGame(bool value)
+    {
+    }
+
+    public void GameFinished(GameResult result)
+    {
+    }
 }

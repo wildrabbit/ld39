@@ -11,9 +11,6 @@ public class TimeManager : MonoBehaviour, IGameplaySystem
 
     GameplayManager gameplayManager;
 
-    [HideInInspector]
-    public bool finished = false;
-
     public float TotalSeconds
     {
         get { return kSecsInHour * electricityBackETAHours; }
@@ -40,19 +37,32 @@ public class TimeManager : MonoBehaviour, IGameplaySystem
     public void StartGame()
     {
         elapsed = 0.0f;
-        finished = false;             
     }
 
-    private void Update()
+
+    public void UpdateSystem(float dt)
     {
-        if (finished) return;
+        if (!gameplayManager.GameStarted || gameplayManager.Paused || gameplayManager.GameFinished) return;
 
         elapsed += Time.deltaTime;
-        
+
         if (RemainingTime <= 0)
         {
-            finished = true;
-            // Notify time out
+            if (Mathf.Approximately(scale,0.0f))
+            {
+                scale = 1.0f;
+            }
+            elapsed = TotalSeconds / scale;
+            
+            gameplayManager.TimeFinished();
         }
+    }
+
+    public void PauseGame(bool value)
+    {
+    }
+
+    public void GameFinished(GameResult result)
+    {
     }
 }

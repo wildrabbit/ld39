@@ -122,7 +122,7 @@ public class Character : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update ()
+    public void LogicUpdate (float dt)
     {
         // TODO: Check game end.
         if (Dead)
@@ -132,7 +132,7 @@ public class Character : MonoBehaviour
 
         if (selectionItem.activeInHierarchy)
         {
-            selectionItem.transform.Rotate(Vector3.forward, 120 * Time.deltaTime);
+            selectionItem.transform.Rotate(Vector3.forward, 120 * dt);
         }
 
         if (StatsUpdating)
@@ -142,42 +142,41 @@ public class Character : MonoBehaviour
 
         TimeManager timeManagerRef = gameplayManager.timeManager;
 
-        float delta = Time.deltaTime; // We might also need the scaled value?
         switch(currentActivity)
         {
             case CharacterActivity.Idle:
             {
-                UpdateIdle(delta);
+                UpdateIdle(dt);
                 break;
             }
             case CharacterActivity.Moving:
             {
-                UpdateMotion(delta);                
+                UpdateMotion(dt);                
                 break;
             }
             case CharacterActivity.Sleep:
             {
-                ApplyActivity(CharacterActivity.Sleep, delta, timeManagerRef.ScaledDelta, 30, 0.2f, Needs.Sleep, SpeechEntry.FocusSleep);                
+                ApplyActivity(CharacterActivity.Sleep, dt, timeManagerRef.ScaledDelta, 30, 0.2f, Needs.Sleep, SpeechEntry.FocusSleep);                
                 break;               
             }
             case CharacterActivity.Eating:
             {
-                ApplyActivity(CharacterActivity.Eating, delta, timeManagerRef.ScaledDelta, 60, 0.5f, Needs.Food, SpeechEntry.FocusEat, true);
+                ApplyActivity(CharacterActivity.Eating, dt, timeManagerRef.ScaledDelta, 60, 0.5f, Needs.Food, SpeechEntry.FocusEat, true);
                 break;
             }
             case CharacterActivity.Drinking:
             {
-                ApplyActivity(CharacterActivity.Drinking, delta, timeManagerRef.ScaledDelta, 30, 1.0f, Needs.Water, SpeechEntry.FocusDrink, true);
+                ApplyActivity(CharacterActivity.Drinking, dt, timeManagerRef.ScaledDelta, 30, 1.0f, Needs.Water, SpeechEntry.FocusDrink, true);
                 break;
             }
             case CharacterActivity.Bath:
             {
-                ApplyActivity(CharacterActivity.Bath, delta, timeManagerRef.ScaledDelta, 15, 0.1f, Needs.Hygiene, SpeechEntry.FocusBath);
+                ApplyActivity(CharacterActivity.Bath, dt, timeManagerRef.ScaledDelta, 15, 0.1f, Needs.Hygiene, SpeechEntry.FocusBath);
                 break;
             }
             case CharacterActivity.WC:
             {
-                ApplyActivity(CharacterActivity.WC, delta, timeManagerRef.ScaledDelta, 10, 1.0f, Needs.Toilet, SpeechEntry.FocusToilet, true);
+                ApplyActivity(CharacterActivity.WC, dt, timeManagerRef.ScaledDelta, 10, 1.0f, Needs.Toilet, SpeechEntry.FocusToilet, true);
                 break;
             }
             case CharacterActivity.Computer:
@@ -188,7 +187,7 @@ public class Character : MonoBehaviour
                 int actIdx = System.Array.IndexOf(entertActivities, currentActivity);
                 if (actIdx > 0)
                 {
-                    ApplyActivity(currentActivity, delta, timeManagerRef.ScaledDelta, entertMinutes[actIdx], entertRates[actIdx], Needs.Entertainment, SpeechEntry.FocusEntertainment);
+                    ApplyActivity(currentActivity, dt, timeManagerRef.ScaledDelta, entertMinutes[actIdx], entertRates[actIdx], Needs.Entertainment, SpeechEntry.FocusEntertainment);
                 }
                 break;
             }

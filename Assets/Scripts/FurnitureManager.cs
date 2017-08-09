@@ -103,9 +103,21 @@ public class FurnitureManager : MonoBehaviour, IGameplaySystem
         }
     }
 
-    // Update is called once per frame
-    void Update ()
+    public void UpdateSystem(float dt)
     {
-		
-	}
+        if (!gameplayManager.GameStarted || gameplayManager.Paused || gameplayManager.GameFinished) return;
+
+        foreach (Furniture p in furnitureTable.Values)
+        {
+            p.LogicUpdate(dt);
+        }
+    }
+
+    public void PauseGame(bool value)
+    {
+    }
+
+    public void GameFinished(GameResult result)
+    {
+    }
 }

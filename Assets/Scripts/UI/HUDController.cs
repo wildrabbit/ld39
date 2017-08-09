@@ -29,6 +29,9 @@ public class HUDController : MonoBehaviour, IGameplaySystem
     public Transform charAvatarContainer;
     public Button resetButton;
 
+    public GameObject endPanel;
+    public Text endMessage;
+
     [Header("Prefabs")]
     public CharPanel charPanelPrefab;
 
@@ -45,6 +48,9 @@ public class HUDController : MonoBehaviour, IGameplaySystem
         // It could probably be better placed on StartGame, but then we have a StartGame dependency between the char. manager and this
         gameplayManager.characterManager.CharactersReady -= OnCharactersReady;
         gameplayManager.characterManager.CharactersReady += OnCharactersReady;
+
+        endPanel.gameObject.SetActive(false);
+
     }
     public void StartGame ()
     {
@@ -85,7 +91,7 @@ public class HUDController : MonoBehaviour, IGameplaySystem
     }
 	
 	// Update is called once per frame
-	void Update ()
+	public void UpdateSystem (float dt)
     {
         timeLeftLabel.text = StringUtils.FormatSeconds(gameplayManager.timeManager.RemainingTime);
         powerValue.fillAmount = gameplayManager.generatorManager.PowerRatio;
@@ -100,5 +106,35 @@ public class HUDController : MonoBehaviour, IGameplaySystem
     void OnResetClicked()
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+    }
+
+    public void PauseGame(bool value)
+    {
+    }
+
+    public void GameFinished(GameResult result)
+    {
+        endPanel.gameObject.SetActive(true);
+        string msg = "";
+        switch (result)
+        {
+            case GameResult.None:
+                break;
+            case GameResult.AllHappy:
+                msg = "Phew! What a night! Luckily you had everything under control, great job!";
+                break;
+            case GameResult.ExistsDeadOrBreakdown:
+                msg = "You lost some members of your family, but hey, it could have been worse, right?";
+                break;
+            case GameResult.AllInBreakdown:
+                msg = "Seems like your family wasn't suited to life without electricity, huh?";
+                break;
+            case GameResult.AllDead:
+                msg = "WTF, Really??";
+                break;
+            default:
+                break;
+        }
+        endMessage.text = msg;
     }
 }

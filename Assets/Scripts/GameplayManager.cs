@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum GameResult
 {
-    None,
+    None = -1,
     AllHappy = 0, //Win
     ExistsDeadOrBreakdown,
     AllInBreakdown,
@@ -24,6 +24,8 @@ public class GameplayManager : MonoBehaviour
     public TouchManager touchManager;
     public HUDController hudController;
 
+    public List<IGameplaySystem> systems;
+
     public Transform sceneRoot;
 
     [Header("Mood")]
@@ -32,6 +34,14 @@ public class GameplayManager : MonoBehaviour
     public ParticleSystem rain;
 
     GameResult result;
+
+    public bool GameStarted
+    {
+        get
+        {
+            return startIssued;
+        }
+    }
 
     public bool GameFinished
     {
@@ -57,8 +67,22 @@ public class GameplayManager : MonoBehaviour
         bgSound.Stop();
         lightning.enabled = false;
         rain.Stop();
+        systems = new List<IGameplaySystem>();
+
+        RegisterSystems();
     }
 
+    void RegisterSystems()
+    {
+        systems.Add(timeManager);
+        systems.Add(generatorManager);
+        systems.Add(characterManager);
+        systems.Add(furnitureManager);
+        systems.Add(roomManager);
+        systems.Add(resourceManager);
+        systems.Add(touchManager);
+        systems.Add(hudController);
+    }
     void Start()
     {
         startIssued = false;
@@ -66,14 +90,10 @@ public class GameplayManager : MonoBehaviour
         result = GameResult.None;
 
         // Build managers
-        timeManager.Initialise(this);
-        generatorManager.Initialise(this);
-        characterManager.Initialise(this);
-        furnitureManager.Initialise(this);
-        roomManager.Initialise(this);
-        resourceManager.Initialise(this);
-        touchManager.Initialise(this);
-        hudController.Initialise(this);
+        foreach(IGameplaySystem system in systems)
+        {
+            system.Initialise(this);
+        }
         nodeManager.BuildGraph();
 
         sceneRoot.gameObject.SetActive(false);
@@ -87,23 +107,38 @@ public class GameplayManager : MonoBehaviour
             sceneRoot.gameObject.SetActive(true);
             GameStart();
             startIssued = true;
+            return;
         }
 
-        // TODO: Determine if we should update
+        GameResult lastResult = result;
+        float delta = Time.deltaTime;
+        foreach (IGameplaySystem system in systems)
+        {
+            system.UpdateSystem(delta);
+        }
+
+        if (lastResult == GameResult.None && lastResult != result)
+        {
+            foreach(IGameplaySystem system in systems)
+            {
+                system.GameFinished(result);
+            }
+        }
     }
 
-
-    public void AllCharactersDeadOrBrokenDown(bool allDead)
+    public void AllCharactersDeadOrBrokenDown(GameResult endResult)
     {
         // Stop all systems.
-        result = allDead ? GameResult.AllDead : GameResult.AllInBreakdown;
+        if (result == GameResult.None)
+            result = endResult;
     }
 
     public void TimeFinished()
     {
         // Resolve game over
         // Poll character state and update result
-        result = characterManager.ResolveGameStatus();
+        if (result == GameResult.None)
+            result = characterManager.ResolveGameStatus();
     }
 
     public void Pause(bool value)
@@ -113,15 +148,12 @@ public class GameplayManager : MonoBehaviour
 
     public void GameStart()
     {
-        timeManager.StartGame();
-        characterManager.StartGame();
-        generatorManager.StartGame();
-        furnitureManager.StartGame();
-        roomManager.StartGame();
-        resourceManager.StartGame();
-        hudController.StartGame();
-        // add touch manager when relevant
+        foreach(IGameplaySystem system in systems)
+        {
+            system.StartGame();
+        }
 
+        result = GameResult.None;
         bgSound.Play();
         lightning.enabled = true;
         rain.Play();
