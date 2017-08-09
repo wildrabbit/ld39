@@ -105,7 +105,7 @@ public class HUDController : MonoBehaviour, IGameplaySystem
 
     void OnResetClicked()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+        gameplayManager.Restart();
     }
 
     public void PauseGame(bool value)

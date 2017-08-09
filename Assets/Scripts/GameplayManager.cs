@@ -124,6 +124,10 @@ public class GameplayManager : MonoBehaviour
                 system.GameFinished(result);
             }
         }
+        else if (result != GameResult.None && Input.anyKeyDown)
+        {
+            Restart();
+        }
     }
 
     public void AllCharactersDeadOrBrokenDown(GameResult endResult)
@@ -157,5 +161,10 @@ public class GameplayManager : MonoBehaviour
         bgSound.Play();
         lightning.enabled = true;
         rain.Play();
+    }
+
+    public void Restart()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
 }

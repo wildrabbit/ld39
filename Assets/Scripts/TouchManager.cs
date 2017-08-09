@@ -28,6 +28,11 @@ public class TouchManager : MonoBehaviour, IGameplaySystem
 	// Update is called once per frame
 	public void UpdateSystem (float dt)
     {
+        if (!gameplayManager.GameStarted || gameplayManager.Paused || gameplayManager.GameFinished)
+        {
+            return;
+        }
+
 		if (Input.GetMouseButtonDown(0))
         {
             Ray ray = camRef.ScreenPointToRay(Input.mousePosition);
