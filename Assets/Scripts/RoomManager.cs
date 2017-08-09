@@ -30,11 +30,9 @@ public class RoomStatus
     public bool lightsOn;
 }
 
-public class RoomManager : MonoBehaviour
+public class RoomManager : MonoBehaviour, IGameplaySystem
 {
-    [Header("Managers")]
-    public GeneratorManager generatorManager;
-    public NodeManager nodeManager;
+    GameplayManager gameplayManager;
 
     [Header("Config")]
     public List<RoomData> rooms;
@@ -43,13 +41,24 @@ public class RoomManager : MonoBehaviour
 
     public System.Action<string, bool> OnRoomLightsSwitched;
 
-    public AudioSource flick;
+    AudioSource flick;
 
-    private void Start()
+    void Start()
     {
         flick = GetComponent<AudioSource>();
+    }
 
-        // Initialise rooms and mappings: Everything to false!
+    public void StartGame()
+    {
+        foreach(RoomStatus room in roomsStatus.Values)
+        {
+            SwitchLights(room.name, room.data.willStartLit, false);
+        }
+    }
+
+    public void Initialise(GameplayManager _gpManager)
+    {
+        gameplayManager = _gpManager;
         for (int i = 0; i < rooms.Count; ++i)
         {
             RoomStatus status = new RoomStatus();
@@ -63,10 +72,7 @@ public class RoomManager : MonoBehaviour
                 status.furnitureMappings[furnitureNode.name] = furnitureNode.furnitureKey;
             }
             roomsStatus[status.name] = status;
-
-            SwitchLights(status.name, status.data.willStartLit, false);
-            
-       }
+        }
     }
 
     public void SwitchLights(string room, bool enabled, bool playSound = false)
@@ -86,11 +92,11 @@ public class RoomManager : MonoBehaviour
         status.data.lights.SetActive(status.lightsOn);
         if (status.lightsOn)
         {
-            generatorManager.AddDepleter(status.data.depleter);
+            gameplayManager.generatorManager.AddDepleter(status.data.depleter);
         }
         else
         {
-            generatorManager.RemoveDepleter(status.data.depleter.source);
+            gameplayManager.generatorManager.RemoveDepleter(status.data.depleter.source);
         }
 
         if (playSound && flick.clip != null)

@@ -6,16 +6,6 @@ public class AuxFurniture : MonoBehaviour
 {
     public List<Furniture> enabledDependentFurnitures;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
     public void SetDependentItemEnabled(Furniture furniture, bool value)
     {
         if (value)

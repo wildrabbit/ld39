@@ -2,24 +2,33 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FurnitureManager : MonoBehaviour
+public class FurnitureManager : MonoBehaviour, IGameplaySystem
 {
+    GameplayManager gameplayManager;
+
     Dictionary<string, Furniture> furnitureTable = new Dictionary<string, Furniture>();
     Dictionary<string, string> assignedCharacters = new Dictionary<string, string>();
 
-	// Use this for initialization
-	void Start ()
+    public void Initialise(GameplayManager _gameplayManager)
     {
+        gameplayManager = _gameplayManager;
         Furniture[] pieces = FindObjectsOfType<Furniture>();
         furnitureTable.Clear();
         for (int i = 0; i < pieces.Length; ++i)
         {
-            pieces[i].InitGame(this);
             furnitureTable[pieces[i].name] = pieces[i];
         }
-	}
+    }
 
-    public EnvironmentActivityCheckResult CanActivityStartAt(CharacterActivity activity, Node n, ActivityContext ctxt)
+    public void StartGame()
+    {
+        foreach (Furniture piece in furnitureTable.Values)
+        {
+            piece.StartGame();
+        }
+    }
+
+        public EnvironmentActivityCheckResult CanActivityStartAt(CharacterActivity activity, Node n, ActivityContext ctxt)
     {
         return EnvironmentActivityCheckResult.Success;
     }

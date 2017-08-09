@@ -11,6 +11,7 @@ public class Character : MonoBehaviour
         Critical,
         Zero
     }
+    // Take this sh*t out of here
     public const float kWarningRatio = 0.3f;
     public const float kCriticalRatio = 0.1f;
 
@@ -28,9 +29,8 @@ public class Character : MonoBehaviour
     public readonly float[] entertMinutes = new float[] { 30.0f, 60.0f, 120.0f, 15.0f };
     public readonly float[] entertRates = new float[] { 0.2f, 0.15f, 0.1f, 0.25f };
 
-    NodeManager nodeManagerRef = null;
-    CharacterManager characterManagerRef = null;
-    TimeManager timeManagerRef = null;
+    // Dependencies: 
+    GameplayManager gameplayManager;
 
     float activityElapsed = -1.0f;
     float statusCheckElapsed = -1.0f;
@@ -100,16 +100,12 @@ public class Character : MonoBehaviour
 
     void Awake()
     {
+        // Internal dependencies.
         rendererRef = GetComponent<SpriteRenderer>();
         colliderRef = GetComponent<Collider2D>();
 
         speechRoot = GameObject.Find("SpeechRoot").transform;
     }
-    // Use this for initialization
-    void Start ()
-    {
-		
-	}
 
     FacingDirection ResolveFacingDirection(Vector2 direction)
     {
@@ -143,6 +139,8 @@ public class Character : MonoBehaviour
         {
             UpdateNeeds();
         }
+
+        TimeManager timeManagerRef = gameplayManager.timeManager;
 
         float delta = Time.deltaTime; // We might also need the scaled value?
         switch(currentActivity)
@@ -204,8 +202,7 @@ public class Character : MonoBehaviour
 
     void UpdateIdle(float delta)
     {
-        FurnitureManager furnitureManager = characterManagerRef.furnitureManager;
-        characterManagerRef.CharacterArrivedToNode(this, currentNode);        
+        gameplayManager.characterManager.CharacterArrivedToNode(this, currentNode);        
     }
 
     void UpdateMotion(float delta)
@@ -227,7 +224,7 @@ public class Character : MonoBehaviour
             {
                 int nextRoomIdx = (prevRoomIdx + 1) % 2;
                 currentRoom = next.rooms[nextRoomIdx];
-                characterManagerRef.roomManager.SwitchLights(currentRoom, true, true);
+                gameplayManager.roomManager.SwitchLights(currentRoom, true, true);
             }
             transform.position = next.transform.position;
             if (willReset)
@@ -244,7 +241,7 @@ public class Character : MonoBehaviour
                     pathNextIdx = -1;
                     path.Clear();
                     SetDirection((currentNode.facing != FacingDirection.None) ? currentNode.facing : FacingDirection.Down, currentNode.forcedFlipY, currentNode.forcedZRotation);
-                    characterManagerRef.CharacterArrivedToNode(this, currentNode);
+                    gameplayManager.characterManager.CharacterArrivedToNode(this, currentNode);
                 }
                 else pathNextIdx++;
             }
@@ -279,7 +276,7 @@ public class Character : MonoBehaviour
             {
                 // Change to idle and disable furniture
                 currentActivity = CharacterActivity.Idle;
-                characterManagerRef.CharacterLeftNode(this, currentNode);
+                gameplayManager.characterManager.CharacterLeftNode(this, currentNode);
             }
             else
             {
@@ -463,7 +460,7 @@ public class Character : MonoBehaviour
         {
             Needs curNeed = (Needs)i;
             //float factor = GetNeedModifierFactor(curNeed);
-            float amount = defaults.initialNeedValue * (timeManagerRef.ScaledDelta / (defaults.defaultNeedDepletionTimeHours[i] * 3600));
+            float amount = defaults.initialNeedValue * (gameplayManager.timeManager.ScaledDelta / (defaults.defaultNeedDepletionTimeHours[i] * 3600));
             amount *= GetNeedModifierFactor(curNeed);
             needs[curNeed] = Mathf.Clamp(needs[curNeed] - amount, 0.0f, defaults.initialNeedValue); // Don't raise anything yet. Maybe activities have changed this.
         }
@@ -546,15 +543,9 @@ public class Character : MonoBehaviour
         EvaluateStats();
     }
 
-    public void SetDependencies(CharacterManager charManager, NodeManager nodeManager, TimeManager timeManager)
+    public void InitFromConfig(GameplayManager _gameplayManager, CharacterConfig cfg, Transform characterRoot, Node node, string roomName)
     {
-        characterManagerRef = charManager;
-        nodeManagerRef = nodeManager;
-        timeManagerRef = timeManager;
-    }
-
-    public void InitFromConfig(CharacterConfig cfg, Transform characterRoot, Node node, string roomName)
-    {
+        gameplayManager = _gameplayManager;
         defaults = cfg;
         name = charName = defaults.name;
 
@@ -658,15 +649,18 @@ public class Character : MonoBehaviour
 
     public void SetTarget(Node target)
     {
+        CharacterManager characterManager = gameplayManager.characterManager;
+        FurnitureManager furnitureManager = gameplayManager.furnitureManager;
+        NodeManager nodeManager = gameplayManager.nodeManager;
         if (target == currentNode) return;
 
-        if (characterManagerRef.ExistsCharacterAtNode(target))
+        if (characterManager.ExistsCharacterAtNode(target))
         {
             Talk(SpeechEntry.Taken);
             return;
         }
 
-        CharacterActivityCheckResult result = CanCharacterEngageInActivity(characterManagerRef.furnitureManager.GetActivity(target.furnitureKey), null);
+        CharacterActivityCheckResult result = CanCharacterEngageInActivity(furnitureManager.GetActivity(target.furnitureKey), null);
         if (result == CharacterActivityCheckResult.Forbidden)
         {
             Talk(SpeechEntry.Restricted);
@@ -684,22 +678,23 @@ public class Character : MonoBehaviour
             {
                 temp = null;
             }
-            nodeManagerRef.FindPath(currentNode.name, target.name, ref path);
+            nodeManager.FindPath(currentNode.name, target.name, ref path);
             pathNextIdx = 0;
             currentActivity = CharacterActivity.Moving;
             if (!string.IsNullOrEmpty(currentNode.furnitureKey))
             {
-                characterManagerRef.CharacterLeftNode(this, currentNode);
+                characterManager.CharacterLeftNode(this, currentNode);
             }
         }
     }
 
     public void SetSelected(bool selected)
     {
-        rendererRef.sortingLayerName = selected ? characterManagerRef.layerSelected
-            : (characterManagerRef.furnitureManager.IsCharacterUsingFurniture(this))
-                ? characterManagerRef.layerOn
-                : characterManagerRef.GetLayerForRoom(currentRoom);
+        CharacterManager characterManager = gameplayManager.characterManager;
+        rendererRef.sortingLayerName = selected ? characterManager.layerSelected
+            : (gameplayManager.furnitureManager.IsCharacterUsingFurniture(this))
+                ? characterManager.layerOn
+                : characterManager.GetLayerForRoom(currentRoom);
         selectionItem.SetActive(selected);
     }
 
@@ -710,6 +705,7 @@ public class Character : MonoBehaviour
 
     public CharacterActivityCheckResult CanCharacterEngageInActivity(CharacterActivity activity, ActivityContext context)
     {
+        RoomManager roomManager = gameplayManager.roomManager;
         if (Dead) return CharacterActivityCheckResult.Dead; // Obviously...
         if (Breakdown && activity != CharacterActivity.Idle && activity != CharacterActivity.Moving) return CharacterActivityCheckResult.Breakdown;
         switch(activity)
@@ -720,7 +716,7 @@ public class Character : MonoBehaviour
                 {
                     return CharacterActivityCheckResult.NeedSatisfied;
                 }
-                else if (characterManagerRef.roomManager.IsRoomLit(currentRoom))
+                else if (roomManager.IsRoomLit(currentRoom))
                 {
                         return CharacterActivityCheckResult.RoomIsLit;
                 }
@@ -790,7 +786,7 @@ public class Character : MonoBehaviour
     public void Talk(SpeechEntry speech)
     {
         if (speechObject.activeInHierarchy) return;
-        StartCoroutine(ShowSpeech(characterManagerRef.GetSpeechIcon(speech)));
+        StartCoroutine(ShowSpeech(gameplayManager.characterManager.GetSpeechIcon(speech)));
     }
 
     IEnumerator ShowSpeech(Sprite icon)

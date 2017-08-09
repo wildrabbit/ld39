@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class NodeManager : MonoBehaviour
 {
+    public Transform nodeRoot;
+
     class VisitedInfo
     {
         public string refNode;
@@ -25,20 +27,9 @@ public class NodeManager : MonoBehaviour
     Dictionary<string, Node> graph = new Dictionary<string, Node>();
     
 
-	// Use this for initialization
-	void Start ()
+    public void BuildGraph()
     {
-        BuildGraph();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
-    void BuildGraph()
-    {
-        Node[] nodes = FindObjectsOfType<Node>();
+        Node[] nodes = nodeRoot.GetComponentsInChildren<Node>();
         int numNodes = nodes.Length;
         for (int i = 0; i < numNodes; ++i)
         {

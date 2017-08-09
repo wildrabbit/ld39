@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-public class HUDController : MonoBehaviour
+public class HUDController : MonoBehaviour, IGameplaySystem
 {
     [System.Serializable]
     public class ActivityIconMapping
@@ -20,13 +20,6 @@ public class HUDController : MonoBehaviour
         public Sprite icon;
     }
 
-    //
-    [Header("Dependencies")]
-    public TimeManager timeManager;
-    public GeneratorManager generatorManager;
-    public AudioListener listener;
-    public CharacterManager charManager;
-
     //---------------------------
     [Header("Widgets")]
     public Text timeLeftLabel;
@@ -39,19 +32,24 @@ public class HUDController : MonoBehaviour
     [Header("Prefabs")]
     public CharPanel charPanelPrefab;
 
+    GameplayManager gameplayManager;
+
     public List<ActivityIconMapping> mappings = new List<ActivityIconMapping>();
     public List<StatusIconMapping> statusMappings = new List<StatusIconMapping>();
 
     // Use this for initialization
-    void Awake()
+    public void Initialise(GameplayManager gpManager)
     {
-        charManager.CharactersReady -= OnCharactersReady;
-        charManager.CharactersReady += OnCharactersReady;
+        gameplayManager = gpManager;
+
+        // It could probably be better placed on StartGame, but then we have a StartGame dependency between the char. manager and this
+        gameplayManager.characterManager.CharactersReady -= OnCharactersReady;
+        gameplayManager.characterManager.CharactersReady += OnCharactersReady;
     }
-    void Start ()
+    public void StartGame ()
     {
-        timeLeftLabel.text = StringUtils.FormatSeconds(timeManager.RemainingTime);
-        powerValue.fillAmount = generatorManager.PowerRatio;
+        timeLeftLabel.text = StringUtils.FormatSeconds(gameplayManager.timeManager.RemainingTime);
+        powerValue.fillAmount = gameplayManager.generatorManager.PowerRatio;
         soundToggle.onClick.AddListener(OnSoundClicked);
         resetButton.onClick.AddListener(OnResetClicked);
         soundLabel.text = (AudioListener.pause) ? "Sound: OFF" : "Sound: ON";
@@ -71,12 +69,12 @@ public class HUDController : MonoBehaviour
 
     public void OnCharactersReady()
     {
-        IEnumerator<Character> chars = charManager.GetCharactersIterator();
+        IEnumerator<Character> chars = gameplayManager.characterManager.GetCharactersIterator();
         while (chars.MoveNext())
         {
             CharPanel panel = Instantiate<CharPanel>(charPanelPrefab);
-            panel.Init(this, charManager, chars.Current);
-            panel.transform.parent = charAvatarContainer;
+            panel.Init(this, gameplayManager.characterManager, chars.Current);
+            panel.transform.SetParent(charAvatarContainer);
             Vector3 pos = panel.transform.position;
             pos.z = 0;
             panel.transform.position = pos;
@@ -89,8 +87,8 @@ public class HUDController : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
-        timeLeftLabel.text = StringUtils.FormatSeconds(timeManager.RemainingTime);
-        powerValue.fillAmount = generatorManager.PowerRatio;
+        timeLeftLabel.text = StringUtils.FormatSeconds(gameplayManager.timeManager.RemainingTime);
+        powerValue.fillAmount = gameplayManager.generatorManager.PowerRatio;
     }
 
     void OnSoundClicked()

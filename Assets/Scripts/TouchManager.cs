@@ -9,22 +9,21 @@ public class RoomTouchMapping
     public Collider2D collider;
 }
 
-public class TouchManager : MonoBehaviour
+public class TouchManager : MonoBehaviour, IGameplaySystem
 {
-    [Header("Manager")]
-    public RoomManager roomManager;
-    public CharacterManager characterManager;
-
     [Header("Config")]
     public RoomTouchMapping[] mappings;
 
     public Camera camRef;
+    GameplayManager gameplayManager;
 
-    // Use this for initialization
-    void Start ()
+    public void Initialise(GameplayManager manager)
     {
-		
-	}
+        gameplayManager = manager;
+    }
+
+    public void StartGame ()
+    {}
 	
 	// Update is called once per frame
 	void Update ()
@@ -42,14 +41,14 @@ public class TouchManager : MonoBehaviour
             // Check for characters first:
             if (chara != null)
             {
-                characterManager.ToggleCharacterSelection(chara);
+                gameplayManager.characterManager.ToggleCharacterSelection(chara);
             }
             else
             {
                 Node node = hitCollider.GetComponent<Node>();
                 if (node != null && node.furnitureKey != "")
                 {
-                    Character selected = characterManager.GetSelected();
+                    Character selected = gameplayManager.characterManager.GetSelected();
                     if (selected != null)
                     {
                         selected.SetTarget(node);
@@ -60,7 +59,7 @@ public class TouchManager : MonoBehaviour
                     touchMapping = System.Array.Find(mappings, (m) => m.collider == hitInfo.collider);
                     if (touchMapping != null)
                     {
-                        roomManager.ToggleRoomLights(touchMapping.roomName);
+                        gameplayManager.roomManager.ToggleRoomLights(touchMapping.roomName);
                     }
                 }
             }

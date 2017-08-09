@@ -38,13 +38,13 @@ public class ContinuousPowerDepleter
     }
 }
 
-public class GeneratorManager : MonoBehaviour
+public class GeneratorManager : MonoBehaviour, IGameplaySystem
 {
-    [Header("Manager dependencies")]
-    [SerializeField]
+    GameplayManager gameplayManager;
+
+    // Useful refs
     TimeManager timeManager;
-    [SerializeField]
-    CharacterManager charManager;
+    CharacterManager characterManager;
 
     [Header("Config data")]
     public float maxGeneratorPower = 100;
@@ -68,9 +68,15 @@ public class GeneratorManager : MonoBehaviour
         }
     }
 
+    public void Initialise(GameplayManager _gameplayManager)
+    {
+        gameplayManager = _gameplayManager;
+        timeManager = gameplayManager.timeManager;
+        characterManager = gameplayManager.characterManager;
+    }
 
     // Use this for initialization
-    void Start ()
+    public void StartGame ()
     {
         remainingGenerator = maxGeneratorPower;        
         depleters.Add(baseDepleter);
@@ -78,13 +84,13 @@ public class GeneratorManager : MonoBehaviour
 
     void Update()
     {
-        if (timeManager.finished) return;
+        if (gameplayManager.GameFinished) return;
 
         Update(timeManager.ScaledDelta);
 
         if (PowerRatio < showWarningBelowRatio && !showedWarning)
         {
-            IEnumerator<Character> chars = charManager.GetCharactersIterator();
+            IEnumerator<Character> chars = characterManager.GetCharactersIterator();
             while (chars.MoveNext())
             {
                 if (!chars.Current.Dead)
@@ -114,7 +120,7 @@ public class GeneratorManager : MonoBehaviour
         }
 
         remainingGenerator -= totalDecrease;
-        // If remaining <= 0...BLACKOUT. Everybody goes crazy!
+        
         CheckGeneratorStatus();
 	}
 

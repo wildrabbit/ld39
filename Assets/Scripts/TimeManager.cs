@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TimeManager : MonoBehaviour
+public class TimeManager : MonoBehaviour, IGameplaySystem
 {
     const float kSecsInHour = 3600;
 
     public float electricityBackETAHours = 24;
     public float scale = 1440.0f; // 1 day / minute
+
+    GameplayManager gameplayManager;
 
     [HideInInspector]
     public bool finished = false;
@@ -30,13 +32,12 @@ public class TimeManager : MonoBehaviour
 
     float elapsed = 0.0f;
 
-    // Use this for initialization
-    void Start ()
+    public void Initialise(GameplayManager _gameplayManager)
     {
-	    StartGame();
-	}
-    
-    void StartGame()
+        gameplayManager = _gameplayManager;
+    }
+
+    public void StartGame()
     {
         elapsed = 0.0f;
         finished = false;             

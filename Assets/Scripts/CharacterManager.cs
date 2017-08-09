@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterManager : MonoBehaviour
+public class CharacterManager : MonoBehaviour, IGameplaySystem
 {
     [Serializable]
     public class SpeechIcons
@@ -12,13 +12,7 @@ public class CharacterManager : MonoBehaviour
         public Sprite icon;
         public string message;
     }
-
-    [Header("Dependencies")]
-    public RoomManager roomManager;
-    public NodeManager nodeManager;
-    public FurnitureManager furnitureManager;
-    public TimeManager timeManager;
-
+    
     [Header("Entity Prefabs")]
     public Character adultTemplate;
     public Character childTemplate;
@@ -26,6 +20,8 @@ public class CharacterManager : MonoBehaviour
     [Header("Config")]
     public List<CharacterConfig> characterData;
     public List<SpeechIcons> speechData;
+
+    GameplayManager gameplayManager;
 
     public Transform characterRoot;
 
@@ -41,9 +37,9 @@ public class CharacterManager : MonoBehaviour
     public Action<Character, Character> SelectionChanged;
     public Action CharactersReady;
 
-    private void Start()
+    public void Initialise(GameplayManager _gameplayManager)
     {
-        StartGame();
+        gameplayManager = _gameplayManager;
     }
 
     public void StartGame()
@@ -54,8 +50,7 @@ public class CharacterManager : MonoBehaviour
             CharacterConfig cfg = characterData[i];
             Character prefab = cfg.kid ? childTemplate : adultTemplate;
             Character newChara = Instantiate<Character>(prefab);
-            newChara.SetDependencies(this, nodeManager, timeManager);
-            newChara.InitFromConfig(cfg, characterRoot, cfg.startNode, cfg.startNode.room);
+            newChara.InitFromConfig(gameplayManager, cfg, characterRoot, cfg.startNode, cfg.startNode.room);
             newChara.StartGame();
             characters.Add(newChara);
         }
@@ -64,8 +59,8 @@ public class CharacterManager : MonoBehaviour
             CharactersReady();
         }
 
-        roomManager.OnRoomLightsSwitched -= OnRoomLightsSwitched;
-        roomManager.OnRoomLightsSwitched += OnRoomLightsSwitched;
+        gameplayManager.roomManager.OnRoomLightsSwitched -= OnRoomLightsSwitched;
+        gameplayManager.roomManager.OnRoomLightsSwitched += OnRoomLightsSwitched;
     }
 
     void OnRoomLightsSwitched(string room, bool on)
@@ -76,7 +71,7 @@ public class CharacterManager : MonoBehaviour
         {
             if (characters[i].currentRoom == room && !IsCharacterSelected(characters[i]) /*&& */)
             {
-                characters[i].SetLayer(on || furnitureManager.IsCharacterUsingFurniture(characters[i]) ? layerOn : layerOff);
+                characters[i].SetLayer(on || gameplayManager.furnitureManager.IsCharacterUsingFurniture(characters[i]) ? layerOn : layerOff);
             }
         }
     }
@@ -99,8 +94,8 @@ public class CharacterManager : MonoBehaviour
         {
             currentCharacter = chara; // NEW SELECT
             currentCharacter.SetSelected(true);
-            if (!roomManager.IsRoomLit(currentCharacter.currentRoom))
-                roomManager.SwitchLights(currentCharacter.currentRoom, true, true);
+            if (!gameplayManager.roomManager.IsRoomLit(currentCharacter.currentRoom))
+                gameplayManager.roomManager.SwitchLights(currentCharacter.currentRoom, true, true);
         }
         else
         {
@@ -111,8 +106,8 @@ public class CharacterManager : MonoBehaviour
                 if (chara != null)
                 {
                     currentCharacter.SetSelected(true);
-                    if (!roomManager.IsRoomLit(currentCharacter.currentRoom))
-                        roomManager.SwitchLights(currentCharacter.currentRoom, true, true);
+                    if (!gameplayManager.roomManager.IsRoomLit(currentCharacter.currentRoom))
+                        gameplayManager.roomManager.SwitchLights(currentCharacter.currentRoom, true, true);
                 }
             }
             else
@@ -140,7 +135,7 @@ public class CharacterManager : MonoBehaviour
 
     public string GetLayerForRoom(string name)
     {
-        RoomStatus room = roomManager.GetRoom(name);
+        RoomStatus room = gameplayManager.roomManager.GetRoom(name);
         if (room != null)
         {
             return room.lightsOn ? layerOn : layerOff;
@@ -152,8 +147,8 @@ public class CharacterManager : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(node.furnitureKey))
         {
-            furnitureManager.CharacterArrivedToNode(chara, node);
-            if (furnitureManager.IsCharacterUsingFurniture(chara))
+            gameplayManager.furnitureManager.CharacterArrivedToNode(chara, node);
+            if (gameplayManager.furnitureManager.IsCharacterUsingFurniture(chara))
             {
                 chara.SetLayer(currentCharacter == chara ? layerSelected : layerOn);
             }
@@ -161,7 +156,7 @@ public class CharacterManager : MonoBehaviour
             {
                 if (currentCharacter != chara)
                 {
-                    chara.SetLayer(roomManager.IsRoomLit(chara.currentRoom) ? layerOff : layerOn);
+                    chara.SetLayer(gameplayManager.roomManager.IsRoomLit(chara.currentRoom) ? layerOff : layerOn);
                 }
                 else
                 {
@@ -175,11 +170,11 @@ public class CharacterManager : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(node.furnitureKey))
         {
-            furnitureManager.CharacterLeftNode(chara, node);
+            gameplayManager.furnitureManager.CharacterLeftNode(chara, node);
             // Reposition character layer
             if (currentCharacter != chara)
             {
-                chara.SetLayer(roomManager.IsRoomLit(chara.currentRoom) ? layerOff : layerOn);
+                chara.SetLayer(gameplayManager.roomManager.IsRoomLit(chara.currentRoom) ? layerOff : layerOn);
             }
             else
             {
@@ -223,5 +218,37 @@ public class CharacterManager : MonoBehaviour
             }
         }
         return false;
+    }
+
+    public GameResult ResolveGameStatus()
+    {
+        GameResult result = GameResult.AllHappy;
+        int numDead = 0;
+        int numInBreakdown = 0;
+        int numChars = characters.Count;
+        for (int i = 0; i < numChars; ++i)
+        {
+            if (characters[i].Dead)
+            {
+                numDead++;
+            }
+            else if (characters[i].Breakdown)
+            {
+                numInBreakdown++;
+            }
+        }
+        if (numDead == numChars)
+        {
+            return GameResult.AllDead;
+        }
+        else if (numDead == numInBreakdown)
+        {
+            return GameResult.AllInBreakdown;
+        }
+        else if (numInBreakdown + numDead > 0)
+        {
+            return GameResult.ExistsDeadOrBreakdown;
+        }
+        return result;
     }
 }
