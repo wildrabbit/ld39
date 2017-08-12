@@ -76,6 +76,16 @@ public class Character : MonoBehaviour
     Transform speechRoot;
     Vector3 offset;
 
+    public Node Target
+    {
+        get
+        {
+            return path == null || path.Count == 0
+                ? null
+                : path[path.Count - 1];
+        }
+    }
+
 
     public bool Dead
     {
@@ -680,7 +690,7 @@ public class Character : MonoBehaviour
         NodeManager nodeManager = gameplayManager.nodeManager;
         if (target == currentNode) return;
 
-        if (characterManager.ExistsCharacterAtNode(target))
+        if (characterManager.ExistsCharacterAtNode(target) || characterManager.ExistsCharacterTargettingNode(target))
         {
             Talk(SpeechEntry.Taken);
             return;
@@ -731,7 +741,6 @@ public class Character : MonoBehaviour
 
     public CharacterActivityCheckResult CanCharacterEngageInActivity(CharacterActivity activity, ActivityContext context)
     {
-        RoomManager roomManager = gameplayManager.roomManager;
         if (Dead) return CharacterActivityCheckResult.Dead; // Obviously...
         if (Breakdown && activity != CharacterActivity.Idle && activity != CharacterActivity.Moving) return CharacterActivityCheckResult.Breakdown;
         switch(activity)
@@ -741,10 +750,6 @@ public class Character : MonoBehaviour
                 if (needs[Needs.Sleep] >= defaults.initialNeedValue * 0.95f)
                 {
                     return CharacterActivityCheckResult.NeedSatisfied;
-                }
-                else if (roomManager.IsRoomLit(currentRoom))
-                {
-                        return CharacterActivityCheckResult.RoomIsLit;
                 }
                 break;
             }

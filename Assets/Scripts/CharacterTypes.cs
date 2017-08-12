@@ -85,10 +85,11 @@ public enum EnvironmentActivityCheckResult
     Success,
     NoFood,
     NoWater,
-    Light, //Darkness activities :D
-    NoLight,
+    DarknessRequired, //Darkness activities :D
+    LightRequired,
     NoPower,
-    NoMeds
+    NoMeds,
+    Error
 }
 public enum CharacterActivityCheckResult
 {
@@ -99,13 +100,13 @@ public enum CharacterActivityCheckResult
     NeedSatisfied,
     NeedNotMet,
     SkillFailed,
-    Forbidden,
-    RoomIsLit
+    Forbidden
 }
 
 public class ActivityContext
 {
-    public string furnitureKey; // For example, if we're operating/repairing, WTF is it we're fixing?
+    public string room;
+    public string chara;
 }
 
 [System.Serializable]

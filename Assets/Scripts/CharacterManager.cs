@@ -147,7 +147,7 @@ public class CharacterManager : MonoBehaviour, IGameplaySystem
     {
         if (!string.IsNullOrEmpty(node.furnitureKey))
         {
-            gameplayManager.furnitureManager.CharacterArrivedToNode(chara, node);
+            gameplayManager.furnitureManager.RefreshCharacterActivityAt(chara, node);
             if (gameplayManager.furnitureManager.IsCharacterUsingFurniture(chara))
             {
                 chara.SetLayer(currentCharacter == chara ? layerSelected : layerOn);
@@ -170,7 +170,7 @@ public class CharacterManager : MonoBehaviour, IGameplaySystem
     {
         if (!string.IsNullOrEmpty(node.furnitureKey))
         {
-            gameplayManager.furnitureManager.CharacterLeftNode(chara, node);
+            gameplayManager.furnitureManager.CancelCharacterActivityAt(chara, node);
             // Reposition character layer
             if (currentCharacter != chara)
             {
@@ -236,6 +236,18 @@ public class CharacterManager : MonoBehaviour, IGameplaySystem
         for (int i = 0; i < characters.Count; ++i)
         {
             if (characters[i].currentNode == n)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool ExistsCharacterTargettingNode(Node n)
+    {
+        for (int i = 0; i < characters.Count; ++i)
+        {
+            if (characters[i].Target == n)
             {
                 return true;
             }

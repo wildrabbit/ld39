@@ -28,16 +28,58 @@ public class FurnitureManager : MonoBehaviour, IGameplaySystem
         }
     }
 
-        public EnvironmentActivityCheckResult CanActivityStartAt(CharacterActivity activity, Node n, ActivityContext ctxt)
+    public EnvironmentActivityCheckResult CanActivityStartAt(CharacterActivity activity, Node n, ActivityContext ctxt)
     {
+        RoomManager roomManager = gameplayManager.roomManager;
+
+        bool roomLit = roomManager.IsRoomLit(ctxt.room);
+        bool theresPowerLeft = gameplayManager.generatorManager.remainingGenerator > 0;
+        switch (activity)
+        {
+            case CharacterActivity.Sleep:
+            {
+                    return (roomLit) ? EnvironmentActivityCheckResult.DarknessRequired : EnvironmentActivityCheckResult.Success;
+            }
+            case CharacterActivity.Bath:
+            case CharacterActivity.Cooking:
+            case CharacterActivity.Dancing:
+            case CharacterActivity.Eating:
+            case CharacterActivity.Drinking:
+            case CharacterActivity.Healing:
+            case CharacterActivity.Read:
+            case CharacterActivity.WC:
+            {
+                    if (!roomLit)
+                    {
+                        return EnvironmentActivityCheckResult.LightRequired;
+                    }
+                    
+                    if ((activity == CharacterActivity.Cooking || activity == CharacterActivity.Dancing) && !theresPowerLeft)
+                    {
+                        return EnvironmentActivityCheckResult.NoPower;
+                    }
+                    break;
+                    
+            }
+            case CharacterActivity.Computer:
+            case CharacterActivity.TV:
+            {
+                if (!theresPowerLeft)
+                {
+                    return EnvironmentActivityCheckResult.NoPower;
+                }
+                break;
+            }
+        }
         return EnvironmentActivityCheckResult.Success;
     }
 
-    public void CharacterArrivedToNode(Character chara, Node node)
+    public void RefreshCharacterActivityAt(Character chara, Node node)
     {
         if (assignedCharacters.ContainsKey(node.furnitureKey) && assignedCharacters[node.furnitureKey] != chara.name)
         {
-            // Kick 'em out!
+            // We shouldn't be here!
+            Debug.LogWarning("Careful! Found a taken node!");
         }
         else
         {
@@ -48,28 +90,45 @@ public class FurnitureManager : MonoBehaviour, IGameplaySystem
                 : furnitureTable[node.furnitureKey].activity;
 
             // TODO: Add context
-            ActivityContext ctxt = null;
+            ActivityContext ctxt = new ActivityContext();
+            ctxt.room = chara.currentRoom;
+            ctxt.chara = chara.charName;
 
-            if (CanActivityStartAt(nodeActivity, node, ctxt) != EnvironmentActivityCheckResult.Success)
+            EnvironmentActivityCheckResult envResult = CanActivityStartAt(nodeActivity, node, ctxt);
+            if (envResult != EnvironmentActivityCheckResult.Success)
             {
-                // Logger
+                switch(envResult)
+                {
+                    case EnvironmentActivityCheckResult.NoPower:
+                    {
+                        chara.Talk(SpeechEntry.NoPower);
+                        break;
+                    }
+                    case EnvironmentActivityCheckResult.DarknessRequired:
+                    {
+                        chara.Talk(SpeechEntry.NoLight);
+                        break;
+                    }
+                    case EnvironmentActivityCheckResult.LightRequired:
+                    {
+                        chara.Talk(SpeechEntry.Light);
+                        break;
+                    }
+                    default: break;
+                }
                 return;
             }
 
             CharacterActivityCheckResult checkResult = chara.CanCharacterEngageInActivity(nodeActivity, null);
             if (checkResult != CharacterActivityCheckResult.Success)
             {
-                if (checkResult == CharacterActivityCheckResult.RoomIsLit)
-                {
-                    chara.Talk(SpeechEntry.NoLight);
-                }
                 return; 
             }
             chara.SetCurrentActivity(nodeActivity);
         }
     }
 
-    public void CharacterLeftNode(Character chara, Node node)
+    public void CancelCharacterActivityAt(Character chara, Node node)
     {
         if (assignedCharacters.ContainsKey(node.furnitureKey))
         {
