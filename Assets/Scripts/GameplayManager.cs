@@ -23,8 +23,9 @@ public class GameplayManager : MonoBehaviour
     public ResourceManager resourceManager;
     public TouchManager touchManager;
     public HUDController hudController;
+    public ActivityManager activityManager;
 
-    public List<IGameplaySystem> systems;
+    List<IGameplaySystem> systems;
 
     public Transform sceneRoot;
 
@@ -95,6 +96,7 @@ public class GameplayManager : MonoBehaviour
             system.Initialise(this);
         }
         nodeManager.BuildGraph();
+        activityManager.BuildTable();
 
         sceneRoot.gameObject.SetActive(false);
 

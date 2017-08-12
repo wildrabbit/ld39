@@ -135,7 +135,7 @@ public class CharacterManager : MonoBehaviour, IGameplaySystem
 
     public string GetLayerForRoom(string name)
     {
-        RoomStatus room = gameplayManager.roomManager.GetRoom(name);
+        Room room = gameplayManager.roomManager.GetRoom(name);
         if (room != null)
         {
             return room.lightsOn ? layerOn : layerOff;
@@ -143,7 +143,7 @@ public class CharacterManager : MonoBehaviour, IGameplaySystem
         return layerOff;
     }
 
-    public void CharacterArrivedToNode(Character chara, Node node)
+    public void RefreshCharacterActivityAt(Character chara, Node node)
     {
         if (!string.IsNullOrEmpty(node.furnitureKey))
         {
@@ -166,7 +166,7 @@ public class CharacterManager : MonoBehaviour, IGameplaySystem
         }
     }
 
-    public void CharacterLeftNode(Character chara, Node node)
+    public void CancelCharacterActivityAt(Character chara, Node node)
     {
         if (!string.IsNullOrEmpty(node.furnitureKey))
         {
@@ -181,6 +181,29 @@ public class CharacterManager : MonoBehaviour, IGameplaySystem
                 chara.SetLayer(layerSelected);
             }
         }
+    }
+
+    public void RefreshSideActivity(Character chara, SideActivity act)
+    {
+        List<Character> neighbours = characters.FindAll(ch => ch != chara);
+        if (neighbours.Count == 0)
+        {
+            // No neighbours. Set side to none.
+            chara.sideActivity = SideActivity.None;
+        }
+        else switch (act)
+        {
+            case SideActivity.Talk:
+            {
+                break;
+            }
+                default:break;
+        }
+    }
+
+    public void CancelSideActivity(Character chara)
+    {
+        chara.sideActivity = SideActivity.None;
     }
 
     public IEnumerator<Character> GetCharactersIterator()

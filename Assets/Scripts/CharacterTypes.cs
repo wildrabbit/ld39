@@ -54,6 +54,12 @@ public enum CharacterStatus
     Dead = 0x4//...
 }
 
+public enum SideActivity : int
+{
+    None,
+    Talk
+}
+
 public enum CharacterActivity : int
 {
     Sleep = 0,
@@ -146,6 +152,7 @@ public enum SpeechEntry
     Breakdown,
     Dead,
     FocusHealth,
+    // TODO Resources empty!
     None
 }
 

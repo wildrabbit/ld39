@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using URandom = UnityEngine.Random;
 public class Character : MonoBehaviour
 {
     public enum StatAlertType
@@ -11,9 +13,13 @@ public class Character : MonoBehaviour
         Critical,
         Zero
     }
+
+    public const int kMinutesToSeconds = 60;
+
     // Take this sh*t out of here
     public const float kWarningRatio = 0.3f;
     public const float kCriticalRatio = 0.1f;
+    public const float kGlobalNeedDelay = 1.0f;
 
     public const float kHealthWarningSickProbability = 0.05f;
     public const float kHealthCriticalSickProbability = 0.07f;
@@ -25,14 +31,17 @@ public class Character : MonoBehaviour
     public const float kDefaultActivityWeight = 10f;
     public const float kDistanceThreshold = 0.05f;
 
-    public readonly CharacterActivity[] entertActivities = new CharacterActivity[] { CharacterActivity.Computer, CharacterActivity.TV, CharacterActivity.Read, CharacterActivity.Dancing };
-    public readonly float[] entertMinutes = new float[] { 30.0f, 60.0f, 120.0f, 15.0f };
-    public readonly float[] entertRates = new float[] { 0.2f, 0.15f, 0.1f, 0.25f };
-
     // Dependencies: 
     GameplayManager gameplayManager;
 
+    float needsElapsed = -1.0f;
+    float needsDelay = kGlobalNeedDelay;
+
     float activityElapsed = -1.0f;
+
+    //float sideActivityElapsed = -1.0f;
+    //float sideActivityDelay = 0.0f;
+
     float statusCheckElapsed = -1.0f;
 
     [HideInInspector]
@@ -42,6 +51,8 @@ public class Character : MonoBehaviour
     public string charName;
 
     public CharacterActivity currentActivity = CharacterActivity.Idle;
+    
+    public SideActivity sideActivity = SideActivity.None;
     public CharacterStatus currentStatus = CharacterStatus.None;
 
     Dictionary<Needs, float> needs = new Dictionary<Needs, float>();
@@ -93,10 +104,6 @@ public class Character : MonoBehaviour
     SpriteRenderer rendererRef;
     Collider2D colliderRef;
 
-    public bool StatsUpdating
-    {
-        get { return (currentStatus & CharacterStatus.Dead) == CharacterStatus.None; }
-    }
 
     void Awake()
     {
@@ -130,14 +137,15 @@ public class Character : MonoBehaviour
             return;
         }
 
+        // Probably make this turn independently on its own script
         if (selectionItem.activeInHierarchy)
         {
             selectionItem.transform.Rotate(Vector3.forward, 120 * dt);
         }
 
-        if (StatsUpdating)
+        if ((currentStatus & CharacterStatus.Dead) == CharacterStatus.None)
         {
-            UpdateNeeds();
+            UpdateNeeds(dt);
         }
 
         TimeManager timeManagerRef = gameplayManager.timeManager;
@@ -155,40 +163,16 @@ public class Character : MonoBehaviour
                 break;
             }
             case CharacterActivity.Sleep:
-            {
-                ApplyActivity(CharacterActivity.Sleep, dt, timeManagerRef.ScaledDelta, 30, 0.2f, Needs.Sleep, SpeechEntry.FocusSleep);                
-                break;               
-            }
             case CharacterActivity.Eating:
-            {
-                ApplyActivity(CharacterActivity.Eating, dt, timeManagerRef.ScaledDelta, 60, 0.5f, Needs.Food, SpeechEntry.FocusEat, true);
-                break;
-            }
             case CharacterActivity.Drinking:
-            {
-                ApplyActivity(CharacterActivity.Drinking, dt, timeManagerRef.ScaledDelta, 30, 1.0f, Needs.Water, SpeechEntry.FocusDrink, true);
-                break;
-            }
             case CharacterActivity.Bath:
-            {
-                ApplyActivity(CharacterActivity.Bath, dt, timeManagerRef.ScaledDelta, 15, 0.1f, Needs.Hygiene, SpeechEntry.FocusBath);
-                break;
-            }
             case CharacterActivity.WC:
-            {
-                ApplyActivity(CharacterActivity.WC, dt, timeManagerRef.ScaledDelta, 10, 1.0f, Needs.Toilet, SpeechEntry.FocusToilet, true);
-                break;
-            }
             case CharacterActivity.Computer:
             case CharacterActivity.TV:
             case CharacterActivity.Read:
             case CharacterActivity.Dancing:
             {
-                int actIdx = System.Array.IndexOf(entertActivities, currentActivity);
-                if (actIdx > 0)
-                {
-                    ApplyActivity(currentActivity, dt, timeManagerRef.ScaledDelta, entertMinutes[actIdx], entertRates[actIdx], Needs.Entertainment, SpeechEntry.FocusEntertainment);
-                }
+                ApplyActivity(currentActivity, dt, timeManagerRef.ScaledDelta);                
                 break;
             }
             default:break;
@@ -201,7 +185,7 @@ public class Character : MonoBehaviour
 
     void UpdateIdle(float delta)
     {
-        gameplayManager.characterManager.CharacterArrivedToNode(this, currentNode);        
+        gameplayManager.characterManager.RefreshCharacterActivityAt(this, currentNode);        
     }
 
     void UpdateMotion(float delta)
@@ -240,42 +224,76 @@ public class Character : MonoBehaviour
                     pathNextIdx = -1;
                     path.Clear();
                     SetDirection((currentNode.facing != FacingDirection.None) ? currentNode.facing : FacingDirection.Down, currentNode.forcedFlipY, currentNode.forcedZRotation);
-                    gameplayManager.characterManager.CharacterArrivedToNode(this, currentNode);
+                    gameplayManager.characterManager.RefreshCharacterActivityAt(this, currentNode);
                 }
                 else pathNextIdx++;
             }
         }
     }
 
-    void ApplyActivity(CharacterActivity act, float delta, float worldDelta, float recoverMinutes, float percent, Needs primary, SpeechEntry speech, bool singleUsage = false, Needs[] secNeeds = null, float[] secRates = null, string[] resTypes = null, int[] resAmounts = null)
+    void ApplyActivity(CharacterActivity act, float delta, float worldDelta)
     {
         activityElapsed += worldDelta;
-        if (activityElapsed >= recoverMinutes * 60)
+
+        ActivityConfig cfg;
+        if (!gameplayManager.activityManager.TryGetActivity(act, out cfg))
+        {
+            Debug.Log($"Couldn't apply activity {act} - not registered!");
+            return;
+        }
+
+        // Ensure we have enough resources
+        if (cfg.resourcesSpent != null)
+        {
+            List<string> missingResources = new List<string>();
+            foreach(ActivityConfig.ResourceEntry resourceSpent in cfg.resourcesSpent)
+            {
+                if (!gameplayManager.resourceManager.TryConsumeResources(resourceSpent.resource, resourceSpent.amount))
+                {
+                    missingResources.Add(resourceSpent.resource);
+                }
+
+            }
+            if (missingResources.Count > 0)
+            {
+                // Talk(Missing stuff)
+                Debug.LogFormat("Missing resources: {0}", string.Join(",",missingResources));
+                return;
+            }
+        }
+
+        float activityDelay = cfg.activityDelay * kMinutesToSeconds;
+        float needEffect = cfg.primaryRecoveryRate;
+        if (activityElapsed >= activityDelay)
         {
             // Yay recover!
-            float needRecovered = percent * defaults.initialNeedValue;
-            needs[primary] = Mathf.Clamp(needs[primary] + needRecovered, 0, defaults.initialNeedValue);
-            Talk(speech);
+            float needRecovered = needEffect * defaults.initialNeedValue;
+            needs[cfg.primaryNeed] = Mathf.Clamp(needs[cfg.primaryNeed] + needRecovered, 0, defaults.initialNeedValue);
+            Talk(cfg.speechEntry);
 
-            if (secNeeds != null && secRates != null)
+            if (cfg.secondaryNeeds!= null)
             {
-                for (int i = 0; i < secNeeds.Length; ++i)
+                foreach (ActivityConfig.NeedEntry tuple in cfg.secondaryNeeds)
                 {
-                    float secDelta = secRates[i] * defaults.initialNeedValue;
-                    needs[secNeeds[i]] = Mathf.Clamp(needs[primary] + secDelta, 0, defaults.initialNeedValue);
+                    float secDelta = tuple.recovery * defaults.initialNeedValue;
+                    needs[tuple.need] = Mathf.Clamp(needs[tuple.need] + secDelta, 0, defaults.initialNeedValue);
                 }
             }
 
-            if (resTypes != null && resAmounts != null)
+
+            if (cfg.resourcesGenerated != null)
             {
-                // TODO: Resources!
+                foreach (ActivityConfig.ResourceEntry tuple in cfg.resourcesGenerated)
+                {
+                    gameplayManager.resourceManager.TryGenerateResource(tuple.resource, tuple.amount);
+                }
             }
 
-            if (singleUsage || Mathf.Approximately(needs[primary], defaults.initialNeedValue))
+            if (cfg.oneShot || Mathf.Approximately(needs[cfg.primaryNeed], defaults.initialNeedValue))
             {
                 // Change to idle and disable furniture
                 currentActivity = CharacterActivity.Idle;
-                gameplayManager.characterManager.CharacterLeftNode(this, currentNode);
+                gameplayManager.characterManager.CancelCharacterActivityAt(this, currentNode);
             }
             else
             {
@@ -379,7 +397,7 @@ public class Character : MonoBehaviour
 
         if (relevantAlerts.Count > 0)
         {
-            int idx = relevantAlerts[Random.Range(0, relevantAlerts.Count - 1)];
+            int idx = relevantAlerts[URandom.Range(0, relevantAlerts.Count - 1)];
             Needs n = (Needs)idx;
             SpeechEntry e = SpeechEntry.None;
             switch(n)
@@ -416,7 +434,7 @@ public class Character : MonoBehaviour
                     }
                 default:break;
             }
-            if (e != SpeechEntry.None && Random.value < 0.000001f)
+            if (e != SpeechEntry.None && URandom.value < 0.000001f)
             {
                 Talk(e);
             }
@@ -451,17 +469,24 @@ public class Character : MonoBehaviour
         }
     }
 
-    void UpdateNeeds()
+    void UpdateNeeds(float dt)
     {
-        int numNeeds = (int)Needs.Count;
-
-        for (int i = 0; i < numNeeds; ++i)
+        // TODO: Give each need its own timer?
+        needsElapsed += dt;
+        if (needsElapsed >= needsDelay)
         {
-            Needs curNeed = (Needs)i;
-            //float factor = GetNeedModifierFactor(curNeed);
-            float amount = defaults.initialNeedValue * (gameplayManager.timeManager.ScaledDelta / (defaults.defaultNeedDepletionTimeHours[i] * 3600));
-            amount *= GetNeedModifierFactor(curNeed);
-            needs[curNeed] = Mathf.Clamp(needs[curNeed] - amount, 0.0f, defaults.initialNeedValue); // Don't raise anything yet. Maybe activities have changed this.
+            float scaledNeedsElapsed = needsElapsed * gameplayManager.timeManager.scale;
+            int numNeeds = (int)Needs.Count;
+
+            for (int i = 0; i < numNeeds; ++i)
+            {
+                Needs curNeed = (Needs)i;
+                //float factor = GetNeedModifierFactor(curNeed);
+                float amount = defaults.initialNeedValue * (scaledNeedsElapsed / (defaults.defaultNeedDepletionTimeHours[i] * 3600));
+                amount *= GetNeedModifierFactor(curNeed);
+                needs[curNeed] = Mathf.Clamp(needs[curNeed] - amount, 0.0f, defaults.initialNeedValue); // Don't raise anything yet. Maybe activities have changed this.
+            }
+            needsElapsed = 0.0f;
         }
     }
 
@@ -537,6 +562,8 @@ public class Character : MonoBehaviour
 
         offset = speechObject.transform.localPosition;
         speechObject.transform.parent = speechRoot;
+
+        needsElapsed = 0.0f;             
 
         SetDirection(currentNode.facing == FacingDirection.None ? FacingDirection.Down : currentNode.facing, currentNode.forcedFlipY, currentNode.forcedZRotation);
         EvaluateStats();
@@ -682,7 +709,7 @@ public class Character : MonoBehaviour
             currentActivity = CharacterActivity.Moving;
             if (!string.IsNullOrEmpty(currentNode.furnitureKey))
             {
-                characterManager.CharacterLeftNode(this, currentNode);
+                characterManager.CancelCharacterActivityAt(this, currentNode);
             }
         }
     }

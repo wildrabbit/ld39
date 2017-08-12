@@ -1377,6 +1377,47 @@ Transform:
   m_Father: {fileID: 1055973571}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &288393031
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 288393032}
+  - component: {fileID: 288393033}
+  m_Layer: 0
+  m_Name: ActivityManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &288393032
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 288393031}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1558920449}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &288393033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 288393031}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83b5a7243ef2869469974032af1aa034, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  activityConfigList: {fileID: 11400000, guid: 111123a8cd7880543a75ffcf5da01f88, type: 2}
 --- !u!1001 &312750172
 Prefab:
   m_ObjectHideFlags: 0
@@ -3416,23 +3457,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3ecb20ab43294647af721c4000702e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rooms:
+  roomConfig:
+  - name: corridor
+    depleter:
+      source: light_corridor
+      timeToDepleteInHours: 48
+      duration: -1
+    lights: {fileID: 1842819172}
+    willStartLit: 1
+    furnitureNodes: []
   - name: kitchen
     depleter:
-      source: kitchen_light
-      timeToDepleteInHours: 18
+      source: light_kitchen
+      timeToDepleteInHours: 48
       duration: -1
     lights: {fileID: 2068169053}
     willStartLit: 0
     furnitureNodes:
-    - {fileID: 810999151}
     - {fileID: 16631726}
+    - {fileID: 810999151}
     - {fileID: 1987084835}
     - {fileID: 548841057}
   - name: bedroom1
     depleter:
-      source: bedroom1_light
-      timeToDepleteInHours: 18
+      source: light_bedroom1
+      timeToDepleteInHours: 48
       duration: -1
     lights: {fileID: 245801989}
     willStartLit: 0
@@ -3441,8 +3490,8 @@ MonoBehaviour:
     - {fileID: 1158832202}
   - name: bedroom2
     depleter:
-      source: bedroom2_light
-      timeToDepleteInHours: 18
+      source: light_bedroom2
+      timeToDepleteInHours: 48
       duration: -1
     lights: {fileID: 703410560}
     willStartLit: 0
@@ -3451,69 +3500,61 @@ MonoBehaviour:
     - {fileID: 765887513}
   - name: bedroom3
     depleter:
-      source: bedroom3_light
-      timeToDepleteInHours: 18
+      source: light_bedroom3
+      timeToDepleteInHours: 48
       duration: -1
     lights: {fileID: 1567464584}
     willStartLit: 0
     furnitureNodes:
-    - {fileID: 741842702}
     - {fileID: 816746955}
+    - {fileID: 741842702}
   - name: bedroom4
     depleter:
-      source: bedroom4_light
-      timeToDepleteInHours: 18
+      source: light_bedroom4
+      timeToDepleteInHours: 48
       duration: -1
     lights: {fileID: 1465764909}
     willStartLit: 0
     furnitureNodes:
     - {fileID: 1222456589}
-  - name: corridor
-    depleter:
-      source: corridor_lights
-      timeToDepleteInHours: 18
-      duration: -1
-    lights: {fileID: 1842819172}
-    willStartLit: 0
-    furnitureNodes: []
-  - name: wc
-    depleter:
-      source: wc_light
-      timeToDepleteInHours: 20
-      duration: -1
-    lights: {fileID: 1390675609}
-    willStartLit: 0
-    furnitureNodes:
-    - {fileID: 637752254}
   - name: garage
     depleter:
-      source: garage_light
-      timeToDepleteInHours: 18
+      source: light_garage
+      timeToDepleteInHours: 48
       duration: -1
     lights: {fileID: 2019435029}
     willStartLit: 0
     furnitureNodes:
     - {fileID: 1053637209}
     - {fileID: 844318255}
+  - name: wc
+    depleter:
+      source: light_wc
+      timeToDepleteInHours: 96
+      duration: -1
+    lights: {fileID: 1390675609}
+    willStartLit: 0
+    furnitureNodes:
+    - {fileID: 637752254}
+  - name: bathroom
+    depleter:
+      source: light_bathroom
+      timeToDepleteInHours: 96
+      duration: -1
+    lights: {fileID: 71106518}
+    willStartLit: 0
+    furnitureNodes:
+    - {fileID: 25884160}
   - name: livingroom
     depleter:
-      source: livingroom_light
-      timeToDepleteInHours: 18
+      source: light_livingroom
+      timeToDepleteInHours: 48
       duration: -1
     lights: {fileID: 107938493}
     willStartLit: 0
     furnitureNodes:
     - {fileID: 702467231}
     - {fileID: 1380422591}
-  - name: bathroom
-    depleter:
-      source: bathroom_light
-      timeToDepleteInHours: 20
-      duration: -1
-    lights: {fileID: 71106518}
-    willStartLit: 0
-    furnitureNodes:
-    - {fileID: 25884160}
 --- !u!82 &692803433
 AudioSource:
   m_ObjectHideFlags: 0
@@ -7751,6 +7792,7 @@ Transform:
   - {fileID: 648085459}
   - {fileID: 419744619}
   - {fileID: 1145511322}
+  - {fileID: 288393032}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7774,6 +7816,7 @@ MonoBehaviour:
   resourceManager: {fileID: 1145511323}
   touchManager: {fileID: 1883255375}
   hudController: {fileID: 1690183131}
+  activityManager: {fileID: 288393033}
   sceneRoot: {fileID: 368987101}
   bgSound: {fileID: 566658998}
   lightning: {fileID: 470092873}
@@ -8045,7 +8088,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   electricityBackETAHours: 12
-  scale: 1440
+  scale: 288
 --- !u!1 &1599569817
 GameObject:
   m_ObjectHideFlags: 0
@@ -8780,7 +8823,7 @@ MonoBehaviour:
   maxGeneratorPower: 100
   baseDepleter:
     source: base
-    timeToDepleteInHours: 18
+    timeToDepleteInHours: 24
     duration: -1
   showWarningBelowRatio: 0.1
   remainingGenerator: 100

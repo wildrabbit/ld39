@@ -1,0 +1,101 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8a834549c5278240bd61192a33b44f3, type: 3}
+  m_Name: ActivityDataList
+  m_EditorClassIdentifier: 
+  activityList:
+  - charActivity: 0
+    activityDelay: 30
+    oneShot: 0
+    primaryNeed: 3
+    primaryRecoveryRate: 0.2
+    speechEntry: 12
+    secondaryNeeds: []
+    resourcesSpent: []
+    resourcesGenerated: []
+  - charActivity: 10
+    activityDelay: 60
+    oneShot: 0
+    primaryNeed: 0
+    primaryRecoveryRate: 0.5
+    speechEntry: 6
+    secondaryNeeds: []
+    resourcesSpent: []
+    resourcesGenerated: []
+  - charActivity: 11
+    activityDelay: 30
+    oneShot: 0
+    primaryNeed: 1
+    primaryRecoveryRate: 1
+    speechEntry: 8
+    secondaryNeeds: []
+    resourcesSpent: []
+    resourcesGenerated: []
+  - charActivity: 13
+    activityDelay: 15
+    oneShot: 0
+    primaryNeed: 5
+    primaryRecoveryRate: 0.1
+    speechEntry: 14
+    secondaryNeeds: []
+    resourcesSpent: []
+    resourcesGenerated: []
+  - charActivity: 12
+    activityDelay: 10
+    oneShot: 0
+    primaryNeed: 2
+    primaryRecoveryRate: 1
+    speechEntry: 10
+    secondaryNeeds: []
+    resourcesSpent: []
+    resourcesGenerated: []
+  - charActivity: 8
+    activityDelay: 30
+    oneShot: 0
+    primaryNeed: 6
+    primaryRecoveryRate: 0.2
+    speechEntry: 16
+    secondaryNeeds: []
+    resourcesSpent: []
+    resourcesGenerated: []
+  - charActivity: 7
+    activityDelay: 60
+    oneShot: 0
+    primaryNeed: 6
+    primaryRecoveryRate: 0.15
+    speechEntry: 16
+    secondaryNeeds: []
+    resourcesSpent: []
+    resourcesGenerated: []
+  - charActivity: 5
+    activityDelay: 80
+    oneShot: 0
+    primaryNeed: 6
+    primaryRecoveryRate: 0.1
+    speechEntry: 16
+    secondaryNeeds: []
+    resourcesSpent: []
+    resourcesGenerated: []
+  - charActivity: 6
+    activityDelay: 15
+    oneShot: 0
+    primaryNeed: 6
+    primaryRecoveryRate: 0.25
+    speechEntry: 16
+    secondaryNeeds: []
+    resourcesSpent: []
+    resourcesGenerated: []
+  sideActivities:
+  - sideActivity: 1
+    activityDelay: 5
+    oneShot: 0
+    primaryNeed: 7
+    primaryRecoveryRate: 0.02

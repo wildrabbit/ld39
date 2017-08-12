@@ -36,6 +36,13 @@ public class ContinuousPowerDepleter
             remaining = 0.0f;
         }
     }
+
+    public float GetDepletionPercentRate()
+    {
+        return 1 / (3600 * timeToDepleteInHours);
+    }
+
+
 }
 
 public class GeneratorManager : MonoBehaviour, IGameplaySystem
@@ -86,7 +93,7 @@ public class GeneratorManager : MonoBehaviour, IGameplaySystem
     {
         if (gameplayManager.GameFinished) return;
 
-        LogicUpdate(timeManager.ScaledDelta);
+        LogicUpdate(dt);
 
         if (PowerRatio < showWarningBelowRatio && !showedWarning)
         {
@@ -105,19 +112,27 @@ public class GeneratorManager : MonoBehaviour, IGameplaySystem
     // Update is called once per frame
     void LogicUpdate (float delta)
     {
-        float depletionScaler = 1.0f / timeManager.scale;
+        float scaledDelta = timeManager.ScaledDelta;
         float totalDecrease = 0.0f;
+        float totalRate = 0.0f;
 		for (int i = depleters.Count - 1; i >= 0; --i)
         {
-            float localRate = maxGeneratorPower * delta / (depleters[i].timeToDepleteInHours * 3600);
-            totalDecrease += localRate;
-            depleters[i].Update(delta);
+            depleters[i].Update(scaledDelta);
             if (depleters[i].Finished)
             {
                 // Notify depleter removed??
                 depleters.RemoveAt(i);
             }
+            else
+            {
+                float localRate = depleters[i].GetDepletionPercentRate();
+                totalRate += localRate;
+                //Debug.Log($"Local depleter: {depleters[i].source}, rate: {localRate:0.#######}, accum. Rate: {totalRate:0.#######}");
+                Mathf.Clamp01(totalRate);
+            }
         }
+        totalDecrease = maxGeneratorPower * scaledDelta * totalRate;
+        //Debug.Log($"Scaled secs: {scaledDelta:0.###}, decrease amount: {totalDecrease:0.###}");
 
         remainingGenerator -= totalDecrease;
         

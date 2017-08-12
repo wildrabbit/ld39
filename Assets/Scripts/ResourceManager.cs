@@ -27,6 +27,30 @@ public class ResourceManager : MonoBehaviour, IGameplaySystem
 
     }
 
+    public bool TryConsumeResources(string resource, int amount)
+    {
+        int current;
+        if (!resources.TryGetValue(resource, out current) || current < amount)
+        {
+            return false;
+        }
+
+        resources[resource] -= amount;
+        return true;
+    }
+
+    public bool TryGenerateResource(string resource, int amount)
+    {
+        int current;
+        if (!resources.TryGetValue(resource, out current)) // Could we have resource caps?
+        {
+            return false;
+        }
+
+        resources[resource] += amount;
+        return true;
+    }
+
     public void UseResource(string resource)
     {
         // Notify

@@ -14,21 +14,23 @@ public class FurnitureConfig
 
     public enum UseType
     {
-        Switch,
-        Manning
+        Toggle,
+        OneShot,
+        EffectOverTime
     }
 
-    public UseType useType;
+    public UseType useType = UseType.EffectOverTime;
 
-    public float breakdownRate; // Probably too much
-    public Skills requiredRepair; // Mechanic / Electric / Mason?
-    public int requiredRepairLevel;
+    public CharacterActivity activity;
+
+    //public float breakdownRate; // Probably too much
+    //public Skills requiredRepair; // Mechanic / Electric / Mason?
+    //public int requiredRepairLevel;
     public List<RequiredSkill> requiredSkills; // Use/manning
 
-    public float rate;
+    public float effectAppliedRate;
     public bool continuous;
     public bool startEnabled;
-    public ContinuousPowerDepleter depleter;
     public AuxFurniture auxiliary;
 }
 

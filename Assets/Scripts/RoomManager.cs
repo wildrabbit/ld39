@@ -21,7 +21,7 @@ public class ActivityEntry
 }
 
 [System.Serializable]
-public class RoomStatus
+public class Room
 {
     public string name;
     public RoomData data; // shortcut
@@ -35,9 +35,9 @@ public class RoomManager : MonoBehaviour, IGameplaySystem
     GameplayManager gameplayManager;
 
     [Header("Config")]
-    public List<RoomData> rooms;
+    public List<RoomData> roomConfig;
 
-    Dictionary<string, RoomStatus> roomsStatus = new Dictionary<string, RoomStatus>();
+    Dictionary<string, Room> roomTable = new Dictionary<string, Room>();
 
     public System.Action<string, bool> OnRoomLightsSwitched;
 
@@ -50,7 +50,7 @@ public class RoomManager : MonoBehaviour, IGameplaySystem
 
     public void StartGame()
     {
-        foreach(RoomStatus room in roomsStatus.Values)
+        foreach(Room room in roomTable.Values)
         {
             SwitchLights(room.name, room.data.willStartLit, false);
         }
@@ -59,11 +59,11 @@ public class RoomManager : MonoBehaviour, IGameplaySystem
     public void Initialise(GameplayManager _gpManager)
     {
         gameplayManager = _gpManager;
-        for (int i = 0; i < rooms.Count; ++i)
+        for (int i = 0; i < roomConfig.Count; ++i)
         {
-            RoomStatus status = new RoomStatus();
-            status.name = rooms[i].name;
-            status.data = rooms[i];
+            Room status = new Room();
+            status.name = roomConfig[i].name;
+            status.data = roomConfig[i];
             status.occupierList.Clear();
             status.furnitureMappings.Clear();
             for (int j = 0; j < status.data.furnitureNodes.Length; ++j)
@@ -71,14 +71,14 @@ public class RoomManager : MonoBehaviour, IGameplaySystem
                 Node furnitureNode = status.data.furnitureNodes[j];
                 status.furnitureMappings[furnitureNode.name] = furnitureNode.furnitureKey;
             }
-            roomsStatus[status.name] = status;
+            roomTable[status.name] = status;
         }
     }
 
     public void SwitchLights(string room, bool enabled, bool playSound = false)
     {
-        RoomStatus status;
-        if (!roomsStatus.TryGetValue(room, out status))
+        Room status;
+        if (!roomTable.TryGetValue(room, out status))
         {
             return;
         }
@@ -86,7 +86,7 @@ public class RoomManager : MonoBehaviour, IGameplaySystem
         SwitchLights(status, enabled, playSound);
     }
 
-    public void SwitchLights(RoomStatus status, bool enabled, bool playSound = false)
+    public void SwitchLights(Room status, bool enabled, bool playSound = false)
     {
         status.lightsOn = enabled;
         status.data.lights.SetActive(status.lightsOn);
@@ -112,8 +112,8 @@ public class RoomManager : MonoBehaviour, IGameplaySystem
 
     public void ToggleRoomLights(string room)
     {
-        RoomStatus status;
-        if (!roomsStatus.TryGetValue(room, out status))
+        Room status;
+        if (!roomTable.TryGetValue(room, out status))
         {
             return;
         }
@@ -121,16 +121,16 @@ public class RoomManager : MonoBehaviour, IGameplaySystem
         SwitchLights(status, !status.lightsOn, true);
     }
 
-    public RoomStatus GetRoom(string name)
+    public Room GetRoom(string name)
     {
-        RoomStatus status = null;
-        roomsStatus.TryGetValue(name, out status);
+        Room status = null;
+        roomTable.TryGetValue(name, out status);
         return status;
     }
 
     public bool IsRoomLit(string name)
     {
-        RoomStatus room = GetRoom(name);
+        Room room = GetRoom(name);
         if (room == null) return true;
         return room.lightsOn;
     }
