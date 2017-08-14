@@ -313,4 +313,9 @@ public class CharacterManager : MonoBehaviour, IGameplaySystem
     public void GameFinished(GameResult result)
     {
     }
+
+    public Character GetCharacter(string name)
+    {
+        return characters.Find(x => x.charName == name);
+    }
 }

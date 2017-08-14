@@ -495,6 +495,26 @@ Prefab:
       propertyPath: activity
       value: 9
       objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 48
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: cooker
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.activity
+      value: 9
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7a6ba9fdbcc40094aa7f08d6541c8203, type: 2}
   m_IsPrefabParent: 0
@@ -623,6 +643,21 @@ Prefab:
     - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
         type: 2}
       propertyPath: activity
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -1070,6 +1105,26 @@ Prefab:
         type: 2}
       propertyPath: activity
       value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.activity
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: tv
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 96
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7a6ba9fdbcc40094aa7f08d6541c8203, type: 2}
@@ -2152,6 +2207,26 @@ Prefab:
     - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
         type: 2}
       propertyPath: activity
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.activity
       value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -5321,6 +5396,21 @@ Prefab:
       propertyPath: activity
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 48
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: heater
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.activity
+      value: 4
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7a6ba9fdbcc40094aa7f08d6541c8203, type: 2}
   m_IsPrefabParent: 0
@@ -5509,6 +5599,21 @@ Prefab:
     - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
         type: 2}
       propertyPath: activity
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: water_tank
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.activity
       value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -6379,6 +6484,26 @@ Prefab:
       propertyPath: activity
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: computer
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 96
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.activity
+      value: 8
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7a6ba9fdbcc40094aa7f08d6541c8203, type: 2}
   m_IsPrefabParent: 0
@@ -6668,6 +6793,26 @@ Prefab:
       propertyPath: activity
       value: 11
       objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.activity
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7a6ba9fdbcc40094aa7f08d6541c8203, type: 2}
   m_IsPrefabParent: 0
@@ -6729,6 +6874,26 @@ Prefab:
         type: 2}
       propertyPath: activity
       value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.activity
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7a6ba9fdbcc40094aa7f08d6541c8203, type: 2}
@@ -7651,6 +7816,26 @@ Prefab:
       propertyPath: activity
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.activity
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: music
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 128
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7a6ba9fdbcc40094aa7f08d6541c8203, type: 2}
   m_IsPrefabParent: 0
@@ -7719,6 +7904,26 @@ Prefab:
     - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
         type: 2}
       propertyPath: activity
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.activity
       value: 13
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -8214,6 +8419,26 @@ Prefab:
     - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
         type: 2}
       propertyPath: activity
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: fridge
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.activity
       value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -8823,7 +9048,7 @@ MonoBehaviour:
   maxGeneratorPower: 100
   baseDepleter:
     source: base
-    timeToDepleteInHours: 24
+    timeToDepleteInHours: 12
     duration: -1
   showWarningBelowRatio: 0.1
   remainingGenerator: 100
@@ -12459,6 +12684,26 @@ Prefab:
       propertyPath: activity
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 96
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: tv
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.activity
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7a6ba9fdbcc40094aa7f08d6541c8203, type: 2}
   m_IsPrefabParent: 0
@@ -13247,6 +13492,21 @@ Prefab:
       propertyPath: activity
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7a6ba9fdbcc40094aa7f08d6541c8203, type: 2}
   m_IsPrefabParent: 0
@@ -13616,6 +13876,26 @@ Prefab:
     - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
         type: 2}
       propertyPath: activity
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.activity
       value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -14265,6 +14545,21 @@ Prefab:
       propertyPath: activity
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7a6ba9fdbcc40094aa7f08d6541c8203, type: 2}
   m_IsPrefabParent: 0
@@ -14487,6 +14782,21 @@ Prefab:
     - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
         type: 2}
       propertyPath: activity
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.useType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.source
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114343618226873414, guid: 7a6ba9fdbcc40094aa7f08d6541c8203,
+        type: 2}
+      propertyPath: cfg.depleter.timeToDepleteInHours
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

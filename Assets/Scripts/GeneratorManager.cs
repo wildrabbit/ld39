@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -60,6 +61,8 @@ public class GeneratorManager : MonoBehaviour, IGameplaySystem
 
     public float showWarningBelowRatio = 0.1f;
     bool showedWarning = false;
+
+    public Action OnGeneratorPowerDown;
 
     //------------------------
 
@@ -169,6 +172,11 @@ public class GeneratorManager : MonoBehaviour, IGameplaySystem
     {
         if (remainingGenerator <= 0)
         {
+            if (OnGeneratorPowerDown != null)
+            {
+                OnGeneratorPowerDown();
+            }
+
             return true;
         }
         return false;

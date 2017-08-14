@@ -50,7 +50,9 @@ public class RoomManager : MonoBehaviour, IGameplaySystem
 
     public void StartGame()
     {
-        foreach(Room room in roomTable.Values)
+        gameplayManager.generatorManager.OnGeneratorPowerDown -= OnPowerOff;
+        gameplayManager.generatorManager.OnGeneratorPowerDown += OnPowerOff;
+        foreach (Room room in roomTable.Values)
         {
             SwitchLights(room.name, room.data.willStartLit, false);
         }
@@ -75,38 +77,45 @@ public class RoomManager : MonoBehaviour, IGameplaySystem
         }
     }
 
-    public void SwitchLights(string room, bool enabled, bool playSound = false)
+    public void SwitchLights(string roomID, bool enabled, bool playSound = false)
     {
-        Room status;
-        if (!roomTable.TryGetValue(room, out status))
+        Room room;
+        if (!roomTable.TryGetValue(roomID, out room))
         {
             return;
         }
 
-        SwitchLights(status, enabled, playSound);
+        SwitchLights(room, enabled, playSound);
     }
 
-    public void SwitchLights(Room status, bool enabled, bool playSound = false)
+    public void SwitchLights(Room room, bool enabled, bool playSound = false)
     {
-        status.lightsOn = enabled;
-        status.data.lights.SetActive(status.lightsOn);
-        if (status.lightsOn)
-        {
-            gameplayManager.generatorManager.AddDepleter(status.data.depleter);
-        }
-        else
-        {
-            gameplayManager.generatorManager.RemoveDepleter(status.data.depleter.source);
-        }
-
         if (playSound && flick.clip != null)
         {
             flick.Play();
         }
+
+        if (enabled && gameplayManager.generatorManager.remainingGenerator < 0)
+        {
+            // Visual Feedback
+            return;
+        }
+
+        room.lightsOn = enabled;
+        room.data.lights.SetActive(room.lightsOn);
+        if (room.lightsOn)
+        {
+            gameplayManager.generatorManager.AddDepleter(room.data.depleter);
+        }
+        else
+        {
+            gameplayManager.generatorManager.RemoveDepleter(room.data.depleter.source);
+        }
+
         
         if (OnRoomLightsSwitched != null)
         {
-            OnRoomLightsSwitched(status.name, enabled);
+            OnRoomLightsSwitched(room.name, enabled);
         }
     }
 
@@ -145,5 +154,13 @@ public class RoomManager : MonoBehaviour, IGameplaySystem
 
     public void GameFinished(GameResult result)
     {
+    }
+
+    public void OnPowerOff()
+    {
+        foreach (Room room in roomTable.Values)
+        {
+            SwitchLights(room, false);
+        }
     }
 }

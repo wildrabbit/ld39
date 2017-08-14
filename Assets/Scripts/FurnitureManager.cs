@@ -9,6 +9,8 @@ public class FurnitureManager : MonoBehaviour, IGameplaySystem
     Dictionary<string, Furniture> furnitureTable = new Dictionary<string, Furniture>();
     Dictionary<string, string> assignedCharacters = new Dictionary<string, string>();
 
+    List<string> tvNodes = new List<string>();
+
     public void Initialise(GameplayManager _gameplayManager)
     {
         gameplayManager = _gameplayManager;
@@ -17,18 +19,26 @@ public class FurnitureManager : MonoBehaviour, IGameplaySystem
         for (int i = 0; i < pieces.Length; ++i)
         {
             furnitureTable[pieces[i].name] = pieces[i];
+            furnitureTable[pieces[i].name].SetManager(gameplayManager);
+            if (pieces[i].name.StartsWith("tv"))
+            {
+                tvNodes.Add(pieces[i].name);
+            }
         }
+        tvNodes.Clear();
     }
 
     public void StartGame()
     {
+        gameplayManager.generatorManager.OnGeneratorPowerDown -= OnPowerOff;
+        gameplayManager.generatorManager.OnGeneratorPowerDown += OnPowerOff;
         foreach (Furniture piece in furnitureTable.Values)
         {
             piece.StartGame();
         }
     }
 
-    public EnvironmentActivityCheckResult CanActivityStartAt(CharacterActivity activity, Node n, ActivityContext ctxt)
+    public EnvironmentActivityCheckResult CanActivityStartAt(CharacterActivity activity, ActivityContext ctxt)
     {
         RoomManager roomManager = gameplayManager.roomManager;
 
@@ -83,48 +93,11 @@ public class FurnitureManager : MonoBehaviour, IGameplaySystem
         }
         else
         {
-            assignedCharacters[node.furnitureKey] = chara.name;
-            furnitureTable[node.furnitureKey].SetOperationState(true);
-            CharacterActivity nodeActivity = (furnitureTable[node.furnitureKey].activity == CharacterActivity.Count)
-                ? CharacterActivity.Idle
-                : furnitureTable[node.furnitureKey].activity;
-
-            // TODO: Add context
-            ActivityContext ctxt = new ActivityContext();
-            ctxt.room = chara.currentRoom;
-            ctxt.chara = chara.charName;
-
-            EnvironmentActivityCheckResult envResult = CanActivityStartAt(nodeActivity, node, ctxt);
-            if (envResult != EnvironmentActivityCheckResult.Success)
+            Furniture f = furnitureTable[node.furnitureKey];
+            if (f.TryCharacterInteractionStart(chara))
             {
-                switch(envResult)
-                {
-                    case EnvironmentActivityCheckResult.NoPower:
-                    {
-                        chara.Talk(SpeechEntry.NoPower);
-                        break;
-                    }
-                    case EnvironmentActivityCheckResult.DarknessRequired:
-                    {
-                        chara.Talk(SpeechEntry.NoLight);
-                        break;
-                    }
-                    case EnvironmentActivityCheckResult.LightRequired:
-                    {
-                        chara.Talk(SpeechEntry.Light);
-                        break;
-                    }
-                    default: break;
-                }
-                return;
+                assignedCharacters[node.furnitureKey] = chara.name;
             }
-
-            CharacterActivityCheckResult checkResult = chara.CanCharacterEngageInActivity(nodeActivity, null);
-            if (checkResult != CharacterActivityCheckResult.Success)
-            {
-                return; 
-            }
-            chara.SetCurrentActivity(nodeActivity);
         }
     }
 
@@ -132,8 +105,8 @@ public class FurnitureManager : MonoBehaviour, IGameplaySystem
     {
         if (assignedCharacters.ContainsKey(node.furnitureKey))
         {
-            assignedCharacters.Remove(node.furnitureKey);
-            furnitureTable[node.furnitureKey].SetOperationState(false);
+            furnitureTable[node.furnitureKey].TryCharacterInteractionStop();
+            assignedCharacters.Remove(node.furnitureKey);            
         }
     }
 
@@ -154,7 +127,7 @@ public class FurnitureManager : MonoBehaviour, IGameplaySystem
         Furniture furniture;
         if (furnitureTable.TryGetValue(furnitureKey, out furniture))
         {
-            return furniture.activity;
+            return furniture.cfg.activity;
         }
         else
         {
@@ -178,5 +151,29 @@ public class FurnitureManager : MonoBehaviour, IGameplaySystem
 
     public void GameFinished(GameResult result)
     {
+    }
+
+    public bool NoTakenTVSeats()
+    {
+        return !tvNodes.Exists(x => assignedCharacters.ContainsKey(x));        
+    }
+    public bool IsLastTVSeat(string removeSeat)
+    {
+        return !tvNodes.Exists(x => x != removeSeat && assignedCharacters.ContainsKey(x));
+    }
+
+    void OnPowerOff()
+    {
+        foreach (Furniture piece in furnitureTable.Values)
+        {
+            if (assignedCharacters.ContainsKey(piece.name) && piece.cfg.depleter.source != "")
+            {
+                Character chara = gameplayManager.characterManager.GetCharacter(piece.name);
+                if (chara != null && chara.currentNode != null)
+                {
+                    CancelCharacterActivityAt(chara, chara.currentNode);
+                }
+            }
+        }
     }
 }

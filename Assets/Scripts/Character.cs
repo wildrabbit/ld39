@@ -63,7 +63,8 @@ public class Character : MonoBehaviour
     Node temp = null;
     List<Node> path = new List<Node>();
     int pathNextIdx = -1;
-    
+    ActivityContext ctxt = new ActivityContext();
+
     public string currentRoom = "";
 
     public float health = 0; // Calculated field
@@ -243,6 +244,25 @@ public class Character : MonoBehaviour
 
     void ApplyActivity(CharacterActivity act, float delta, float worldDelta)
     {
+        ctxt.chara = charName;
+        ctxt.room = currentRoom;
+
+        EnvironmentActivityCheckResult check = gameplayManager.furnitureManager.CanActivityStartAt(currentActivity, ctxt);
+        if (check != EnvironmentActivityCheckResult.Success)
+        {
+            SpeechHelper.ReportEnvironmentActivityCheck(this, check);
+            //SetCurrentActivity(CharacterActivity.Idle);
+            return;
+        }
+
+        CharacterActivityCheckResult charCheck = CanCharacterEngageInActivity(currentActivity, null);
+        if (charCheck != CharacterActivityCheckResult.Success)
+        {
+            SpeechHelper.ReportCharacterActivityCheck(this, charCheck);
+            //SetCurrentActivity(CharacterActivity.Idle);
+            return;
+        }
+
         activityElapsed += worldDelta;
 
         ActivityConfig cfg;
@@ -252,30 +272,31 @@ public class Character : MonoBehaviour
             return;
         }
 
-        // Ensure we have enough resources
-        if (cfg.resourcesSpent != null)
-        {
-            List<string> missingResources = new List<string>();
-            foreach(ActivityConfig.ResourceEntry resourceSpent in cfg.resourcesSpent)
-            {
-                if (!gameplayManager.resourceManager.TryConsumeResources(resourceSpent.resource, resourceSpent.amount))
-                {
-                    missingResources.Add(resourceSpent.resource);
-                }
-
-            }
-            if (missingResources.Count > 0)
-            {
-                // Talk(Missing stuff)
-                Debug.LogFormat("Missing resources: {0}", string.Join(",",missingResources));
-                return;
-            }
-        }
-
         float activityDelay = cfg.activityDelay * kMinutesToSeconds;
         float needEffect = cfg.primaryRecoveryRate;
+
         if (activityElapsed >= activityDelay)
         {
+            // Ensure we have enough resources
+            if (cfg.resourcesSpent != null)
+            {
+                List<string> missingResources = new List<string>();
+                foreach (ActivityConfig.ResourceEntry resourceSpent in cfg.resourcesSpent)
+                {
+                    if (!gameplayManager.resourceManager.TryConsumeResources(resourceSpent.resource, resourceSpent.amount))
+                    {
+                        missingResources.Add(resourceSpent.resource);
+                    }
+
+                }
+                if (missingResources.Count > 0)
+                {
+                    // Talk(Missing stuff)
+                    Debug.LogFormat("Missing resources: {0}", string.Join(",", missingResources));
+                    return;
+                }
+            }
+
             // Yay recover!
             float needRecovered = needEffect * defaults.initialNeedValue;
             needs[cfg.primaryNeed] = Mathf.Clamp(needs[cfg.primaryNeed] + needRecovered, 0, defaults.initialNeedValue);
@@ -697,9 +718,9 @@ public class Character : MonoBehaviour
         }
 
         CharacterActivityCheckResult result = CanCharacterEngageInActivity(furnitureManager.GetActivity(target.furnitureKey), null);
+        SpeechHelper.ReportCharacterActivityCheck(this, result);
         if (result == CharacterActivityCheckResult.Forbidden)
-        {
-            Talk(SpeechEntry.Restricted);
+        {            
             return;
         }
         
@@ -765,7 +786,7 @@ public class Character : MonoBehaviour
             {
                 if (needs[Needs.Water] >= defaults.initialNeedValue * 0.95f)
                 {
-                        return CharacterActivityCheckResult.NeedSatisfied;
+                    return CharacterActivityCheckResult.NeedSatisfied;
                 }
                 break;
             }
@@ -798,7 +819,6 @@ public class Character : MonoBehaviour
                 if (Sick) return CharacterActivityCheckResult.Sick;
                 else if (defaults.kid)
                 {
-                    Talk(SpeechEntry.Restricted);
                     return CharacterActivityCheckResult.Forbidden;
                 }
                 break;

@@ -21,6 +21,12 @@ public class FurnitureConfig
 
     public UseType useType = UseType.EffectOverTime;
 
+    [Tooltip("For toggle-like furniture")]
+    public ContinuousPowerDepleter depleter = new ContinuousPowerDepleter();
+
+    [Tooltip ("For one-shot and effect over time")]
+    public SinglePowerDepleter oneoffDepleter = new SinglePowerDepleter();
+
     public CharacterActivity activity;
 
     //public float breakdownRate; // Probably too much
@@ -36,10 +42,10 @@ public class FurnitureConfig
 
 public class Furniture : MonoBehaviour
 {
+    GameplayManager gameplayManager;
     public FurnitureConfig cfg;
     bool isEnabled = false;
-    public CharacterActivity activity = CharacterActivity.Count;
-
+    
     public bool IsEnabled
     {
         get
@@ -65,6 +71,87 @@ public class Furniture : MonoBehaviour
     public void LogicUpdate(float dt)
     {
         if (!isEnabled) return;
-        // Do stuff
+        
+        // Do stuff        
+    }
+
+    public bool TryCharacterInteractionStart(Character chara)
+    {
+        switch(cfg.useType)
+        {
+            case FurnitureConfig.UseType.EffectOverTime:
+                {
+                    CharacterActivity nodeActivity = (cfg.activity == CharacterActivity.Count)
+                        ? CharacterActivity.Idle
+                        : cfg.activity;
+
+                    // TODO: Add context
+                    ActivityContext ctxt = new ActivityContext();
+                    ctxt.room = chara.currentRoom;
+                    ctxt.chara = chara.charName;
+
+                    EnvironmentActivityCheckResult envResult = gameplayManager.furnitureManager.CanActivityStartAt(nodeActivity, ctxt);
+                    if (envResult != EnvironmentActivityCheckResult.Success)
+                    {
+                        SpeechHelper.ReportEnvironmentActivityCheck(chara, envResult);
+                        return false;
+                    }
+
+                    CharacterActivityCheckResult checkResult = chara.CanCharacterEngageInActivity(nodeActivity, null);
+                    SpeechHelper.ReportCharacterActivityCheck(chara, checkResult);
+                    if (checkResult != CharacterActivityCheckResult.Success)
+                    {
+                        return false;
+                    }
+
+                    SetOperationState(true);
+                    chara.SetCurrentActivity(nodeActivity);
+                    if (cfg.depleter.source != "" && (cfg.activity != CharacterActivity.TV || gameplayManager.furnitureManager.NoTakenTVSeats()))
+                    {
+                        gameplayManager.generatorManager.AddDepleter(cfg.depleter);
+                    }
+                    return true;
+                }
+            case FurnitureConfig.UseType.Toggle:
+                {
+                    bool toggleValue = !isEnabled;
+                    if (gameplayManager.generatorManager.remainingGenerator < 0)
+                    {
+                        toggleValue = false;
+                    }
+
+                    if (toggleValue)
+                    {
+                        gameplayManager.generatorManager.AddDepleter(cfg.depleter);
+                    }
+                    else
+                    {
+                        gameplayManager.generatorManager.RemoveDepleter(cfg.depleter.source);
+                    }
+                    SetOperationState(toggleValue);
+                    break;
+                }
+            case FurnitureConfig.UseType.OneShot:
+                {
+                    // Do stuff
+                    break;
+                }
+        }
+        return false;
+    }
+
+    public void TryCharacterInteractionStop()
+    {
+        if (cfg.useType != FurnitureConfig.UseType.EffectOverTime) return;
+        if (cfg.depleter.source != "" || (cfg.activity == CharacterActivity.TV && gameplayManager.furnitureManager.IsLastTVSeat(name)))
+        {
+            gameplayManager.generatorManager.RemoveDepleter(cfg.depleter.source);
+        }
+        SetOperationState(false);
+    }
+
+    public void SetManager(GameplayManager mgr)
+    {
+        gameplayManager = mgr;
     }
 }
